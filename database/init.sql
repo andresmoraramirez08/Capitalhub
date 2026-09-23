@@ -60,25 +60,19 @@ CREATE TABLE horarios_barberos (
 );
 
 -- -----------------------------------------------------------------------------
--- 3. CATÁLOGO DE SERVICIOS
+-- 3. CATÁLOGO DE SERVICIOS (INDIVIDUALES Y COMBINADOS)
 -- -----------------------------------------------------------------------------
-CREATE TABLE servicios (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    duracion_minutos INT NOT NULL CHECK (duracion_minutos > 0),
-    precio NUMERIC(10,2) NOT NULL CHECK (precio >= 0.00),
-    activo BOOLEAN DEFAULT TRUE,
-    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+INSERT INTO servicios (nombre, descripcion, duracion_minutos, precio) VALUES
+-- Servicios Individuales
+('Corte de Cabello Regular', 'Corte clásico o moderno con terminado a navaja', 40, 180.00),
+('Arreglo de Barba', 'Delineado, rebaje y toalla caliente', 20, 120.00),
+('Facial Limpieza Profunda', 'Exfoliación, vapor de ozono y mascarilla purificante', 40, 250.00),
+('Pigmentación de Barba', 'Tinte y definición de áreas claras en barba', 10, 90.00),
 
--- Semilla inicial de servicios según requerimiento RF-AG-01
-INSERT INTO servicios (nombre, duracion_minutos, precio) VALUES
-('Corte de Cabello Regular', 40, 180.00),
-('Arreglo de Barba', 20, 120.00),
-('Facial Limpieza Profunda', 40, 250.00),
-('Pigmentación de Barba', 10, 90.00);
-
+-- Servicios Combinados (Tiempo de silla optimizado con cobro íntegro)
+('Corte de Cabello + Facial', 'Corte de cabello realizado en paralelo mientras actúa la mascarilla facial', 60, 430.00),
+('Corte de Cabello + Arreglo de Barba', 'Servicio integral de cabello y perfilado de barba', 50, 300.00),
+('Servicio Completo (Corte + Barba + Facial)', 'Experiencia completa de cuidado personal masculino', 75, 550.00);
 -- -----------------------------------------------------------------------------
 -- 4. AGENDAMIENTO DE CITAS Y COMISIONES
 -- -----------------------------------------------------------------------------
