@@ -62,6 +62,13 @@ CREATE TABLE horarios_barberos (
 -- -----------------------------------------------------------------------------
 -- 3. CATÁLOGO DE SERVICIOS (INDIVIDUALES Y COMBINADOS)
 -- -----------------------------------------------------------------------------
+CREATE TABLE servicios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    duracion_minutos INT NOT NULL,
+    precio NUMERIC(10,2) NOT NULL
+);
 INSERT INTO servicios (nombre, descripcion, duracion_minutos, precio) VALUES
 -- Servicios Individuales
 ('Corte de Cabello Regular', 'Corte clásico o moderno con terminado a navaja', 40, 180.00),
