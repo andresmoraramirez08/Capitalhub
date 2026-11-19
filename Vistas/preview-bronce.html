@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Barbería | Bronce Industrial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            gold: '#C2884A',
+                            goldHover: '#9E6730',
+                            dark: '#000000',
+                            card: '#121212',
+                            cardElevated: '#1A1A1A',
+                            border: '#262626',
+                            muted: '#A3A3A3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen selection:bg-brand-gold selection:text-black">
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-black/90 border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="w-10 h-10 rounded-lg bg-brand-gold flex items-center justify-center font-extrabold text-black text-xl shadow-lg">
+                    C
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white block leading-none">CAPITAL</span>
+                    <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-300">
+                <a href="#servicios" class="hover:text-brand-gold transition-colors">Servicios & Combos</a>
+                <a href="#tienda" class="hover:text-brand-gold transition-colors">Tienda E-Commerce</a>
+                <a href="#ubicacion" class="hover:text-brand-gold transition-colors">Ubicación</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="#agendar"
+                    class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-5 py-2.5 rounded-lg text-sm transition shadow-lg">
+                    Agendar Cita
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div
+                        class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                        <span>Atención Profesional en Durango Capital</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        El arte del cuidado <br class="hidden sm:inline">
+                        <span class="text-brand-gold">masculino premium.</span>
+                    </h1>
+                    <p class="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto lg:mx-0">
+                        Reserva con tu barbero favorito con 24 horas de antelación o adquiere tus productos en tienda.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#agendar"
+                            class="w-full sm:w-auto text-center bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-8 py-3.5 rounded-xl transition">
+                            Reservar Cita Online
+                        </a>
+                        <a href="#tienda"
+                            class="w-full sm:w-auto text-center border border-brand-border hover:border-neutral-500 bg-brand-card text-white font-semibold px-6 py-3.5 rounded-xl transition">
+                            Ver Productos
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:col-span-5">
+                    <div class="rounded-2xl border border-brand-border bg-brand-card p-6 shadow-2xl">
+                        <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+                            <span class="text-xs font-semibold text-brand-muted uppercase">Servicio Destacado</span>
+                            <span class="text-xs text-brand-gold font-bold">Turno Optimizado</span>
+                        </div>
+                        <div
+                            class="mt-4 p-4 bg-brand-dark rounded-xl border border-brand-border flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white text-sm">Corte + Facial Limpieza</p>
+                                <p class="text-xs text-brand-muted">60 min de sesión</p>
+                            </div>
+                            <span class="text-brand-gold font-extrabold text-lg">$430 MXN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

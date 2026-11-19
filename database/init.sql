@@ -1,7 +1,6 @@
--- =============================================================================
--- CAPITALHUB - ESQUEMA DE BASE DE DATOS DEFINITIVO (POSTGRESQL)
+
+-- CAPITALHUB - ESQUEMA DE BASE DE DATOS (POSTGRESQL)
 -- Proyecto: CapitalHub - Barbería Capital
--- Alumno: Kevin Andrés Mora Ramírez
 -- Fase 2: Arquitectura y Modelado de Datos
 -- =============================================================================
 

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CapitalHub - Gestión de Barberos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+    
+    <!-- Menú Lateral -->
+    <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
+        <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
+            <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
+            <a href="barberos.html" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Barberos</a>
+            <a href="#" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="servicios.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+        </nav>
+        <div class="p-4 border-t border-zinc-800">
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold">Gestión de Barberos</h1>
+            <p class="text-zinc-400 mt-1">Registra y administra a tu equipo de trabajo.</p>
+        </header>
+        
+        <!-- Formulario de Registro -->
+        <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800 max-w-lg">
+            <h2 class="text-xl font-semibold mb-4">Agregar Nuevo Barbero</h2>
+            <form id="form-barbero" class="space-y-4">
+                <div>
+                    <label class="block text-zinc-400 text-sm mb-1">Nombre Completo</label>
+                    <input type="text" id="nombre" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-sm mb-1">Teléfono</label>
+                    <input type="tel" id="telefono" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-sm mb-1">Especialidad</label>
+                    <input type="text" id="especialidad" placeholder="Ej. Fade, Barba, Clásico" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
+                </div>
+                <button type="submit" class="w-full bg-zinc-100 text-black font-semibold py-2 rounded hover:bg-white transition mt-4">
+                    Registrar Barbero
+                </button>
+            </form>
+        </div>
+        <!-- Tabla de Barberos -->
+        <div class="mt-10 max-w-4xl">
+            <h2 class="text-xl font-bold mb-4">Plantilla Activa</h2>
+            <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden">
+                <table class="w-full text-left text-sm text-zinc-400">
+                    <thead class="bg-zinc-800/50 text-white border-b border-zinc-800">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Nombre</th>
+                            <th class="px-4 py-3 font-semibold">Teléfono</th>
+                            <th class="px-4 py-3 font-semibold">Especialidad</th>
+                            <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-barberos" class="divide-y divide-zinc-800">
+                        <!-- Los barberos se inyectarán aquí mediante JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        document.getElementById('form-barbero').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value;
+            const telefono = document.getElementById('telefono').value;
+            const especialidad = document.getElementById('especialidad').value;
+
+            try {
+                const response = await fetch('/api/barberos/registrar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nombre, telefono, especialidad })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('¡Barbero registrado con éxito!');
+                    document.getElementById('form-barbero').reset(); // Limpia el formulario
+                    cargarBarberos(); // Recarga la lista de barberos
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión.');
+            }
+        });
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        async function cargarBarberos() {
+            try {
+                const response = await fetch('/api/barberos', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (response.ok) {
+                    const barberos = await response.json();
+                    const tbody = document.getElementById('lista-barberos');
+                    tbody.innerHTML = ''; // Limpiamos antes de dibujar
+
+                    barberos.forEach(barbero => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-zinc-800/30 transition">
+                                <td class="px-4 py-3 text-white font-medium">${barbero.nombre}</td>
+                                <td class="px-4 py-3">${barbero.telefono}</td>
+                                <td class="px-4 py-3">${barbero.especialidad}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <button class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error de conexión al cargar la tabla:', error);
+            }
+        }
+
+        // Ejecutar al cargar la página
+        cargarBarberos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Barbería | Agendamiento y E-Commerce</title>
+
+    <!-- Fuente Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8',       // Gris platino suave (reemplaza al blanco puro)
+                            goldHover: '#A1A1AA',  // Gris acero al pasar el mouse
+                            dark: '#09090B',       // Negro grafito muy profundo (no negro absoluto)
+                            card: '#18181B',       // Gris oscuro para las tarjetas
+                            cardElevated: '#27272A', // Gris medio para los botones secundarios
+                            border: '#3F3F46',     // Bordes en gris visible
+                            muted: '#A1A1AA'       // Textos secundarios equilibrados
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen selection:bg-brand-gold selection:text-black">
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-black/90 border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-xl shadow-lg shadow-brand-gold/20">
+                    C
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white block leading-none">CAPITAL</span>
+                    <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-300">
+                <a href="#servicios" class="hover:text-brand-gold transition-colors">Servicios & Combos</a>
+                <a href="#barberos" class="hover:text-brand-gold transition-colors">Equipo</a>
+                <a href="#tienda" class="hover:text-brand-gold transition-colors">Tienda E-Commerce</a>
+                <a href="#ubicacion" class="hover:text-brand-gold transition-colors">Ubicación</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <a href="#agendar"
+                    class="hidden sm:inline-flex text-xs font-semibold text-neutral-400 hover:text-white transition">
+                    Soy Barbero / Admin
+                </a>
+                <a href="#agendar"
+                    class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-5 py-2.5 rounded-lg text-sm transition shadow-lg shadow-brand-gold/25 transform hover:-translate-y-0.5">
+                    Agendar Cita
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= HERO SECTION ================= -->
+    <section class="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div
+                        class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                        <span>Atención Profesional en Durango Capital</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        El arte del cuidado <br class="hidden sm:inline">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-500">
+                            masculino premium.
+                        </span>
+                    </h1>
+                    <p class="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto lg:mx-0">
+                        Reserva tu turno en línea con tu barbero favorito con mínimo 24 horas de antelación o adquiere
+                        tus productos con entrega local o envío en todo Durango.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#agendar"
+                            class="w-full sm:w-auto text-center bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-8 py-3.5 rounded-xl shadow-xl shadow-brand-gold/25 transition">
+                            Reservar Cita Online
+                        </a>
+                        <a href="#tienda"
+                            class="w-full sm:w-auto text-center border border-brand-border hover:border-neutral-500 bg-brand-card text-white font-semibold px-6 py-3.5 rounded-xl transition">
+                            Ver Productos
+                        </a>
+                    </div>
+                    <div
+                        class="grid grid-cols-3 gap-6 pt-6 border-t border-brand-border max-w-lg mx-auto lg:mx-0 text-center sm:text-left">
+                        <div>
+                            <p class="text-2xl font-bold text-white">5</p>
+                            <p class="text-xs text-brand-muted">Barberos expertos</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">24h</p>
+                            <p class="text-xs text-brand-muted">Anticipación web</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">10 min</p>
+                            <p class="text-xs text-brand-muted">Margen tolerancia</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 relative">
+                    <div
+                        class="relative mx-auto max-w-md rounded-2xl border border-brand-border bg-brand-card p-6 shadow-2xl">
+                        <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+                            <span class="text-xs font-semibold text-brand-muted uppercase tracking-wider">Cita
+                                Rápida</span>
+                            <span
+                                class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">Turnos
+                                Disponibles</span>
+                        </div>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-brand-muted mb-1">Servicio
+                                    destacado</label>
+                                <div
+                                    class="p-3 bg-brand-dark rounded-lg border border-brand-border text-sm flex justify-between items-center">
+                                    <span class="font-medium text-white">Corte + Facial Limpieza</span>
+                                    <span class="text-brand-gold font-bold">$430 MXN</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-brand-muted mb-1">Duración
+                                        optimizada</label>
+                                    <div
+                                        class="p-2.5 bg-brand-dark rounded-lg border border-brand-border text-xs text-neutral-300">
+                                        ⏱️ 60 minutos
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-brand-muted mb-1">Modalidad</label>
+                                    <div
+                                        class="p-2.5 bg-brand-dark rounded-lg border border-brand-border text-xs text-neutral-300">
+                                        👤 Con cuenta o Invitado
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#agendar"
+                                class="block w-full text-center bg-brand-cardElevated hover:bg-neutral-800 text-white font-semibold py-2.5 rounded-lg text-xs transition border border-brand-border">
+                                Iniciar Asistente de Agendamiento
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= SERVICIOS Y COMBOS ================= -->
+    <section id="servicios" class="py-16 bg-black border-t border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs uppercase font-bold tracking-widest text-brand-gold mb-2">Menú de Barbería</h2>
+                <p class="text-3xl font-extrabold text-white tracking-tight">Servicios Individuales y Combos</p>
+                <p class="text-sm text-brand-muted mt-2">Tiempos de silla optimizados para tu comodidad y cobro justo.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Servicio 1 -->
+                <div
+                    class="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-gold/50 transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Corte de Cabello Regular</h3>
+                        <span class="text-brand-gold font-bold text-lg">$180</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">Corte clásico o moderno terminado a navaja con perfilado
+                        limpio.</p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span>⏱️ 40 minutos</span>
+                        <span class="text-brand-gold font-medium">Individual</span>
+                    </div>
+                </div>
+
+                <!-- Servicio 2 -->
+                <div
+                    class="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-gold/50 transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Arreglo de Barba</h3>
+                        <span class="text-brand-gold font-bold text-lg">$120</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">Delineado con toalla caliente, bálsamo y terminado
+                        afeitado.</p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span>⏱️ 20 minutos</span>
+                        <span class="text-brand-gold font-medium">Individual</span>
+                    </div>
+                </div>
+
+                <!-- Servicio 3 -->
+                <div
+                    class="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-gold/50 transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Facial Limpieza Profunda</h3>
+                        <span class="text-brand-gold font-bold text-lg">$250</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">Exfoliación con vapor de ozono y mascarilla purificante
+                        negra.</p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span>⏱️ 40 minutos</span>
+                        <span class="text-brand-gold font-medium">Individual</span>
+                    </div>
+                </div>
+
+                <!-- Combo 1 (Destacado) -->
+                <div
+                    class="bg-brand-card border-2 border-brand-gold rounded-xl p-6 relative shadow-lg shadow-brand-gold/10">
+                    <div
+                        class="absolute -top-3 right-4 bg-brand-gold text-black text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
+                        Recomendado
+                    </div>
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Corte + Facial Limpieza</h3>
+                        <span class="text-brand-gold font-extrabold text-xl">$430</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">El corte se realiza en paralelo mientras actúa la
+                        mascarilla facial.</p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span class="font-semibold text-white">⏱️ 60 min (Ahorras 20 min)</span>
+                        <span
+                            class="text-white font-bold border border-neutral-700 bg-neutral-800 px-2 py-1 rounded text-[10px] uppercase tracking-wider">Combo
+                            Express</span>
+                    </div>
+                </div>
+
+                <!-- Combo 2 -->
+                <div
+                    class="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-gold/50 transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Corte + Arreglo de Barba</h3>
+                        <span class="text-brand-gold font-bold text-lg">$300</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">Servicio integral de cabello y barba en una sola sesión
+                        fluida.</p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span>⏱️ 50 minutos</span>
+                        <span
+                            class="text-neutral-300 font-medium border border-neutral-800 px-2 py-1 rounded text-[10px] uppercase tracking-wider">Combo
+                            Dúo</span>
+                    </div>
+                </div>
+
+                <!-- Combo 3 (Full) -->
+                <div
+                    class="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-gold/50 transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">Servicio Completo Total</h3>
+                        <span class="text-brand-gold font-bold text-lg">$550</span>
+                    </div>
+                    <p class="text-xs text-brand-muted mb-4">Experiencia completa: Corte, Barba y Facial purificante.
+                    </p>
+                    <div
+                        class="flex items-center justify-between text-xs pt-4 border-t border-brand-border text-neutral-400">
+                        <span>⏱️ 75 minutos</span>
+                        <span
+                            class="text-neutral-300 font-medium border border-neutral-800 px-2 py-1 rounded text-[10px] uppercase tracking-wider">Combo
+                            Máximo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= WIZARD AGENDAMIENTO ================= -->
+    <section id="agendar" class="py-20 border-t border-brand-border bg-brand-dark">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <span class="text-xs font-bold text-brand-gold uppercase tracking-wider">Flujo de Reserva</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Agenda tu Turno en 4 Pasos</h2>
+                <p class="text-xs text-brand-muted mt-2">Política obligatoria: Reserva mínima con 24 horas de
+                    anticipación.</p>
+            </div>
+
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <!-- Indicador de pasos -->
+                <div class="grid grid-cols-4 gap-2 mb-8 text-center text-xs font-semibold">
+                    <div class="pb-2 border-b-2 border-brand-gold text-brand-gold">1. Servicio</div>
+                    <div class="pb-2 border-b-2 border-brand-border text-neutral-500">2. Barbero</div>
+                    <div class="pb-2 border-b-2 border-brand-border text-neutral-500">3. Fecha & Hora</div>
+                    <div class="pb-2 border-b-2 border-brand-border text-neutral-500">4. Datos</div>
+                </div>
+
+                <!-- Paso 1: Selección -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 1: Elige el servicio o
+                        combo</h3>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <label
+                            class="flex items-center justify-between p-4 rounded-xl border border-brand-gold/60 bg-brand-gold/5 cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="servicio" checked
+                                    class="text-brand-gold focus:ring-brand-gold bg-black border-brand-border">
+                                <div>
+                                    <p class="text-sm font-bold text-white">Corte + Facial Limpieza</p>
+                                    <p class="text-xs text-brand-muted">60 min de sesión</p>
+                                </div>
+                            </div>
+                            <span class="text-brand-gold font-bold text-sm">$430</span>
+                        </label>
+
+                        <label
+                            class="flex items-center justify-between p-4 rounded-xl border border-brand-border bg-brand-dark hover:border-neutral-600 cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="servicio"
+                                    class="text-brand-gold focus:ring-brand-gold bg-black border-brand-border">
+                                <div>
+                                    <p class="text-sm font-bold text-white">Corte de Cabello Regular</p>
+                                    <p class="text-xs text-brand-muted">40 min</p>
+                                </div>
+                            </div>
+                            <span class="text-white font-bold text-sm">$180</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Modalidad de Cliente (Invitado vs Registrado) -->
+                <div class="mt-8 pt-6 border-t border-brand-border">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 4 (Previsualización):
+                        Tipo de Registro</h3>
+                    <div class="grid grid-cols-2 gap-3 p-1 bg-brand-dark rounded-xl border border-brand-border mb-4">
+                        <button
+                            class="py-2 text-xs font-bold rounded-lg bg-brand-cardElevated text-brand-gold border border-brand-border">
+                            Continuar como Invitado (Sin Registro)
+                        </button>
+                        <button class="py-2 text-xs font-medium rounded-lg text-neutral-400 hover:text-white">
+                            Tengo una Cuenta (Iniciar Sesión)
+                        </button>
+                    </div>
+                    <div class="grid sm:grid-cols-3 gap-3">
+                        <input type="text" placeholder="Nombre completo"
+                            class="bg-black border border-brand-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-gold placeholder-neutral-500">
+                        <input type="tel" placeholder="Teléfono celular (WhatsApp)"
+                            class="bg-black border border-brand-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-gold placeholder-neutral-500">
+                        <input type="email" placeholder="Correo para comprobante"
+                            class="bg-black border border-brand-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-gold placeholder-neutral-500">
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button
+                        class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-6 py-2.5 rounded-lg text-xs transition">
+                        Continuar a Selección de Barbero →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= E-COMMERCE ================= -->
+    <section id="tienda" class="py-16 bg-black border-t border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div>
+                    <span class="text-xs uppercase font-bold tracking-widest text-brand-gold">Tienda en Línea</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Catálogo de Productos</h2>
+                    <p class="text-xs text-brand-muted mt-1">Entrega directa en sucursal o envíos por paquetería dentro
+                        de Durango.</p>
+                </div>
+                <div
+                    class="mt-4 md:mt-0 inline-flex items-center space-x-2 text-xs bg-brand-card px-3 py-2 rounded-lg border border-brand-border text-brand-muted">
+                    <span>📦 Modalidad de entrega:</span>
+                    <strong class="text-white">Recoger en local / Envío local Durango</strong>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Producto 1 -->
+                <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-4xl border border-brand-border">
+                            💈
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-brand-gold">Ceras y Pomadas</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Pomada Fijación Fuerte Mate</h4>
+                        <p class="text-xs text-brand-muted mt-1">Base agua, acabado natural sin brillo.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
+                        <span class="text-white font-bold text-sm">$220 MXN</span>
+                        <button
+                            class="bg-brand-gold/10 hover:bg-brand-gold text-brand-gold hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-brand-gold/30">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producto 2 -->
+                <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-4xl border border-brand-border">
+                            🧔
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-brand-gold">Barba</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Minoxidil 5% Solución</h4>
+                        <p class="text-xs text-brand-muted mt-1">Tratamiento para estimulación de barba.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
+                        <span class="text-white font-bold text-sm">$350 MXN</span>
+                        <button
+                            class="bg-brand-gold/10 hover:bg-brand-gold text-brand-gold hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-brand-gold/30">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producto 3 -->
+                <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-4xl border border-brand-border">
+                            🧴
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-brand-gold">Shampoos</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Shampoo Anticaída y Carbón</h4>
+                        <p class="text-xs text-brand-muted mt-1">Limpieza profunda de cuero cabelludo.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
+                        <span class="text-white font-bold text-sm">$190 MXN</span>
+                        <button
+                            class="bg-brand-gold/10 hover:bg-brand-gold text-brand-gold hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-brand-gold/30">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producto 4 -->
+                <div class="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div
+                            class="h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-4xl border border-brand-border">
+                            ✨
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-brand-gold">Tintes</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Pigmento Negro para Barba</h4>
+                        <p class="text-xs text-brand-muted mt-1">Definición temporal de contornos.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-brand-border flex items-center justify-between">
+                        <span class="text-white font-bold text-sm">$160 MXN</span>
+                        <button
+                            class="bg-brand-gold/10 hover:bg-brand-gold text-brand-gold hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-brand-gold/30">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= UBICACIÓN ================= -->
+    <section id="ubicacion" class="py-12 border-t border-brand-border bg-brand-dark">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h3 class="text-white font-bold text-base">Capital Barbería</h3>
+                <p class="text-xs text-brand-muted mt-1">Prol. Pino Suárez 2910, José Guadalupe Rodriguez, Durango, Dgo.
+                </p>
+                <p class="text-xs text-brand-gold mt-1">📞 Teléfono: 618-310-0009</p>
+            </div>
+            <div class="text-xs text-brand-muted text-center sm:text-right">
+                <p>Proyecto de Estadía Profesional - Kevin Mora</p>
+                <p class="text-[10px] text-neutral-500">Universidad Politécnica de Durango (UNIPOLI)</p>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>

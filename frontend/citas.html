@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita - CapitalHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+
+    <!-- Aquí iría tu Sidebar (cópialo de servicios.html) -->
+    
+    <main class="flex-1 p-10">
+        <h1 class="text-3xl font-bold mb-8">Agendar Nueva Cita</h1>
+
+        <form id="form-citas" class="bg-zinc-900 p-6 rounded-lg max-w-2xl">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Datos del Cliente -->
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Nombre del Cliente</label>
+                    <input type="text" id="nombre_invitado" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 focus:border-zinc-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Teléfono (WhatsApp)</label>
+                    <input type="text" id="telefono_invitado" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 focus:border-zinc-500" required>
+                </div>
+
+                <!-- Selección de Barbero y Servicio -->
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Barbero</label>
+                    <select id="barbero_id" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 focus:border-zinc-500 cursor-pointer" required>
+                        <option value="" disabled selected>Selecciona un barbero...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Servicio</label>
+                    <select id="servicio_id" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 focus:border-zinc-500 cursor-pointer" required>
+                        <option value="" disabled selected>Selecciona un servicio...</option>
+                    </select>
+                </div>
+
+                <!-- Fecha y Hora -->
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Fecha</label>
+                    <input type="date" id="fecha_cita" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700" required>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1 text-gray-400">Hora</label>
+                    <input type="time" id="hora_inicio" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700" required>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-white text-black font-bold py-2 rounded mt-4 hover:bg-gray-200 transition">
+                Confirmar Cita
+            </button>
+        </form>
+    </main>
+
+    <!-- Script para enviar y traer los datos al Backend -->
+    <script>
+        console.log("¡El archivo JS sí se está leyendo!"); // Prueba de vida
+
+        // Función para cargar las listas desde la base de datos
+        async function cargarOpciones() {
+            console.log("Iniciando carga de opciones...");
+            try {
+                const token = localStorage.getItem('token'); 
+                
+                const configuracion = {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                // 1. Cargar Barberos 
+                const resBarberos = await fetch('/api/barberos', configuracion);
+                if (resBarberos.ok) {
+                    const barberos = await resBarberos.json();
+                    console.log("Barberos encontrados:", barberos);
+                    const selectBarbero = document.getElementById('barbero_id');
+                    barberos.forEach(barbero => {
+                        selectBarbero.innerHTML += `<option value="${barbero.id}">${barbero.nombre}</option>`;
+                    });
+                } else {
+                    console.log("Error al traer barberos. Código:", resBarberos.status);
+                }
+
+                // 2. Cargar Servicios 
+                const resServicios = await fetch('/api/servicios', configuracion);
+                if (resServicios.ok) {
+                    const servicios = await resServicios.json();
+                    console.log("Servicios encontrados:", servicios);
+                    const selectServicio = document.getElementById('servicio_id');
+                    servicios.forEach(servicio => {
+                        selectServicio.innerHTML += `<option value="${servicio.id}">${servicio.nombre} - $${servicio.precio}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error("Error al cargar las opciones:", error);
+            }
+        }
+
+        // Ejecutar directo y sin pedir permiso
+        cargarOpciones();
+
+        // Función para enviar la nueva cita
+        document.getElementById('form-citas').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+
+            const nuevaCita = {
+                nombre_invitado: document.getElementById('nombre_invitado').value,
+                telefono_invitado: document.getElementById('telefono_invitado').value,
+                barbero_id: document.getElementById('barbero_id').value,
+                servicio_id: document.getElementById('servicio_id').value,
+                fecha_cita: document.getElementById('fecha_cita').value,
+                hora_inicio: document.getElementById('hora_inicio').value
+            };
+
+            try {
+                const token = localStorage.getItem('token'); 
+                
+                const response = await fetch('/api/citas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(nuevaCita)
+                });
+
+                if (response.ok) {
+                    alert('¡Cita agendada exitosamente en la base de datos!');
+                    document.getElementById('form-citas').reset(); 
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error al guardar la cita:', error);
+                alert('No se pudo conectar con el servidor.');
+            }
+        });
+    </script>
+</body>
+</html>

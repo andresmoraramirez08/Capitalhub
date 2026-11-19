@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CapitalHub - Panel Principal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+    
+    <!-- Menú Lateral (Sidebar) -->
+    <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
+        <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
+            <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Dashboard</a>
+            <a href="#" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="#" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
+            <a href="#" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
+            <a href="barberos.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
+            <a href="servicios.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+        </nav>
+        <div class="p-4 border-t border-zinc-800">
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold">Bienvenido, <span id="user-name" class="text-[#e5e5e5]"></span></h1>
+                <p class="text-zinc-400 mt-1">Resumen operativo de hoy</p>
+            </div>
+        </header>
+        
+        <!-- Grid de Indicadores -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800">
+                <h3 class="text-zinc-400 text-sm mb-2">Citas Pendientes</h3>
+                <p class="text-4xl font-bold" id="citas-count">0</p>
+            </div>
+            <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800">
+                <h3 class="text-zinc-400 text-sm mb-2">Ingresos Estimados</h3>
+                <p class="text-4xl font-bold text-emerald-500" id="ingresos-total">$0.00</p>
+            </div>
+            <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800">
+                <h3 class="text-zinc-400 text-sm mb-2">Barberos Activos</h3>
+                <p class="text-4xl font-bold" id="barberos-count">0</p>
+            </div>
+                <p class="text-4xl font-bold">0</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        document.getElementById('user-name').textContent = localStorage.getItem('nombre');
+
+        async function cargarResumen() {
+            try {
+                // Al estar en el mismo servidor, ya solo usamos la ruta relativa
+                const response = await fetch('/api/dashboard/resumen', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('citas-count').textContent = data.citasPendientes;
+                    document.getElementById('ingresos-total').textContent = '$' + data.ingresos.toFixed(2);
+                    document.getElementById('barberos-count').textContent = data.barberosActivos;
+                }
+            } catch (error) {
+                console.error('Error al cargar el resumen:', error);
+            }
+        }
+
+        // Ejecutamos la función inmediatamente al entrar al panel
+        cargarResumen();
+
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
