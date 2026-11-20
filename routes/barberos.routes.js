@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { registrarBarbero, obtenerBarberos } = require('../controllers/barberos.controller');
-const { verificarToken } = require('../middleware/auth.middleware');
+const { verificarToken } = require('../middlewares/auth.middleware');
 
 router.post('/registrar', verificarToken, registrarBarbero);
 router.get('/', verificarToken, obtenerBarberos);
