@@ -114,6 +114,48 @@
             }
         });
     </script>
+
+    <script>
+    // Seleccionamos tu formulario exactamente como lo nombraste
+    const loginForm = document.getElementById('loginForm'); 
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evitamos que la página se recargue
+
+        // Extraemos el texto usando los IDs 'correo' y 'password'
+        const email = document.getElementById('correo').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            // Mandamos los datos a tu servidor
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Si el login es correcto, guardamos su token y datos
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('usuario_id', data.id || data.user?.id);
+                localStorage.setItem('rol', data.rol || data.user?.rol);
+                
+                // Redirigimos al dashboard
+                window.location.href = 'dashboard.html'; 
+            } else {
+                // Si se equivocó de contraseña, le avisamos
+                alert(data.message || data.error || 'Credenciales inválidas');
+            }
+        } catch (error) {
+            console.error('Error en el login:', error);
+            alert('Hubo un error al conectar con el servidor.');
+        }
+    });
+</script>
 </body>
 
 </html>

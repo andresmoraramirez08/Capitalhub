@@ -23,6 +23,10 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/barberos', barberosRoutes);
 app.use('/api/servicios', serviciosRoutes);
 app.use('/api/citas', citasRoutes);
+app.use('/api/horarios', require('./routes/horarios.routes'));
+app.use('/api/clientes', require('./routes/clientes.routes'));
+app.use('/api/catalogo', require('./routes/catalogo.routes'));
+app.use('/api/comisiones', require('./routes/comisiones.routes'));
 
 // Configuración de la conexión a PostgreSQL
 const pool = new Pool({

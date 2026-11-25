@@ -10,12 +10,16 @@
     <!-- Menú Lateral -->
     <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
         <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
             <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
         </div>
         <nav class="flex-1 p-4 space-y-2">
             <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
-            <a href="barberos.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
-            <a href="servicios.html" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Servicios</a>
+            <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
+            <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
+            <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Servicios</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
             <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
@@ -41,11 +45,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-zinc-400 text-sm mb-1">Precio ($)</label>
-                        <input type="number" id="precio" step="0.01" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
+                        <input type="number" id="precio" step="0.01" min="0" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
                     </div>
                     <div>
                         <label class="block text-zinc-400 text-sm mb-1">Duración (minutos)</label>
-                        <input type="number" id="duracion" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
+                        <input type="number" id="duracion" min="1" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white focus:outline-none focus:border-zinc-500">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-zinc-100 text-black font-semibold py-2 rounded hover:bg-white transition mt-4">
@@ -53,6 +57,7 @@
                 </button>
             </form>
         </div>
+
         <!-- Tabla de Servicios -->
         <div class="mt-10 max-w-4xl">
             <h2 class="text-xl font-bold mb-4">Servicios Disponibles</h2>
@@ -74,9 +79,47 @@
         </div>
     </main>
 
+    <!-- Modal Editar Servicio -->
+    <div id="modal-editar-servicio" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-white">Editar Servicio</h3>
+                <button onclick="cerrarModalServicio()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <form id="form-editar-servicio" class="space-y-4">
+                <input type="hidden" id="edit-serv-id">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Nombre del Servicio</label>
+                    <input type="text" id="edit-serv-nombre" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Precio ($)</label>
+                        <input type="number" id="edit-serv-precio" step="0.01" min="0" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Duración (min)</label>
+                        <input type="number" id="edit-serv-duracion" min="1" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="cerrarModalServicio()" class="px-4 py-2 rounded bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-zinc-100 text-black text-sm font-semibold hover:bg-white">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
+
+        const rolUsuario = localStorage.getItem('rol');
+        if (rolUsuario !== '1') {
+            window.location.href = 'dashboard.html';
+        }
+
+        let serviciosCache = [];
 
         document.getElementById('form-servicio').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -91,7 +134,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ nombre, precio, duracion_minutos  })
+                    body: JSON.stringify({ nombre, precio, duracion_minutos })
                 });
 
                 const data = await response.json();
@@ -99,6 +142,7 @@
                 if (response.ok) {
                     alert('¡Servicio registrado con éxito!');
                     document.getElementById('form-servicio').reset();
+                    cargarServicios();
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -112,27 +156,28 @@
             localStorage.clear();
             window.location.href = 'login.html';
         }
-async function cargarServicios() {
+
+        async function cargarServicios() {
             try {
                 const response = await fetch('/api/servicios', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
                 if (response.ok) {
-                    const servicios = await response.json();
+                    serviciosCache = await response.json();
                     const tbody = document.getElementById('lista-servicios');
                     tbody.innerHTML = ''; 
 
-                    servicios.forEach(servicio => {
-                        console.log("Datos que llegan del servidor:", servicio);
-                        
+                    serviciosCache.forEach(servicio => {
                         tbody.innerHTML += `
                             <tr class="hover:bg-zinc-800/30 transition">
                                 <td class="px-4 py-3 text-white font-medium">${servicio.nombre}</td>
-                                <td class="px-4 py-3">$${servicio.precio}</td>
+                                <td class="px-4 py-3">$${Number(servicio.precio).toFixed(2)}</td>
                                 <td class="px-4 py-3">${servicio.duracion_minutos} min</td>
-                                <td class="px-4 py-3 text-right">
-                                <button onclick="borrarServicio('${servicio.id}')" class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>                                </td>
+                                <td class="px-4 py-3 text-right space-x-3">
+                                    <button onclick="abrirModalServicio('${servicio.id}')" class="text-blue-400 hover:text-blue-300 transition text-sm font-medium">Editar</button>
+                                    <button onclick="borrarServicio('${servicio.id}')" class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
+                                </td>
                             </tr>
                         `;
                     });
@@ -142,33 +187,80 @@ async function cargarServicios() {
             }
         }
 
-        cargarServicios();   
-        
-        async function borrarServicio(idServicio) {
-    const confirmar = confirm("¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.");
-    
-    if (!confirmar) return;
+        function abrirModalServicio(id) {
+            const s = serviciosCache.find(item => String(item.id) === String(id));
+            if (!s) return;
 
-    try {
-        const response = await fetch(`/api/servicios/${idServicio}`, {
-            method: 'DELETE',
-            // Si ya tienes el token de seguridad activo, descomenta la siguiente línea:
-            // headers: { 'Authorization': `Bearer ${token}` } 
+            document.getElementById('edit-serv-id').value = s.id;
+            document.getElementById('edit-serv-nombre').value = s.nombre || '';
+            document.getElementById('edit-serv-precio').value = s.precio;
+            document.getElementById('edit-serv-duracion').value = s.duracion_minutos;
+
+            const modal = document.getElementById('modal-editar-servicio');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalServicio() {
+            const modal = document.getElementById('modal-editar-servicio');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('form-editar-servicio').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-serv-id').value;
+            const nombre = document.getElementById('edit-serv-nombre').value;
+            const precio = document.getElementById('edit-serv-precio').value;
+            const duracion_minutos = document.getElementById('edit-serv-duracion').value;
+
+            try {
+                const response = await fetch(`/api/servicios/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nombre, precio, duracion_minutos })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    cerrarModalServicio();
+                    cargarServicios();
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo actualizar'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión.');
+            }
         });
 
-        if (response.ok) {
-            alert("Servicio eliminado exitosamente");
-            // Llama a tu función que vuelve a pintar la tabla para que el cambio se vea al instante
-            // Ejemplo: cargarServicios(); 
-        } else {
-            console.error("Error al eliminar");
-            alert("Hubo un problema al intentar eliminar el servicio.");
-        }
-    } catch (error) {
-        console.error("Error de conexión:", error);
-    }
-}
-    </script>
+        async function borrarServicio(idServicio) {
+            const confirmar = confirm("¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.");
+            
+            if (!confirmar) return;
 
+            try {
+                const response = await fetch(`/api/servicios/${idServicio}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert("Servicio eliminado exitosamente");
+                    cargarServicios();
+                } else {
+                    console.error("Error al eliminar");
+                    alert("Hubo un problema al intentar eliminar el servicio.");
+                }
+            } catch (error) {
+                console.error("Error de conexión:", error);
+            }
+        }
+
+        cargarServicios();
+    </script>
 </body>
 </html>

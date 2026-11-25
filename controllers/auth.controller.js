@@ -35,10 +35,16 @@ const login = async (req, res) => {
             { expiresIn: '8h' }
         );
 
-        res.json({ message: 'Login exitoso', token, nombre: usuario.nombre });
+        res.json({
+            message: 'Login exitoso',
+            token: token,
+            nombre: usuario.nombre,
+            id: usuario.id,
+            rol: usuario.rol_id
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error del servidor' });
+        return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
 

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - CapitalHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+
+    <!-- Menú Lateral -->
+    <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
+        <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
+            <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
+            <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white transition">Catálogo</a>
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
+            <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
+            <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+        </nav>
+        <div class="p-4 border-t border-zinc-800">
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex flex-wrap justify-between items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">Catálogo y Ventas</h1>
+                <p class="text-zinc-400 mt-1">Administra categorías, productos, inventario y ventas directas.</p>
+            </div>
+            <a href="dashboard.html" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition border border-zinc-700 text-sm font-medium">
+                ← Volver al Dashboard
+            </a>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 max-w-7xl mb-8">
+            <!-- Columna 1: Nuevo Producto + Nueva Categoría -->
+            <div class="xl:col-span-2 space-y-6">
+                <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800">
+                    <h2 class="text-lg font-bold mb-4">Agregar Producto</h2>
+                    <form id="form-producto" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Nombre del producto</label>
+                            <input type="text" id="prod-nombre" required placeholder="Ej. Pomada Mate 100g" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Categoría</label>
+                            <select id="prod-categoria" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                                <option value="">Sin categoría</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">SKU (opcional)</label>
+                            <input type="text" id="prod-sku" placeholder="Ej. POM-001" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Precio ($)</label>
+                            <input type="number" step="0.01" min="0" id="prod-precio" required placeholder="180.00" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Stock inicial</label>
+                            <input type="number" min="0" id="prod-stock" value="10" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Stock mínimo (alerta)</label>
+                            <input type="number" min="0" id="prod-stock-min" value="3" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs text-zinc-400 mb-1">Descripción (opcional)</label>
+                            <input type="text" id="prod-descripcion" placeholder="Fijación media, acabado natural..." class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit" class="w-full bg-zinc-100 text-black font-semibold py-2 rounded hover:bg-white transition">
+                                Guardar Producto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Nueva Categoría Rápida -->
+                <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800">
+                    <h3 class="text-base font-bold mb-3">Nueva Categoría</h3>
+                    <form id="form-categoria" class="flex flex-wrap gap-3">
+                        <input type="text" id="cat-nombre" required placeholder="Ej. Ceras y Pomadas" class="flex-1 min-w-[180px] bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        <input type="text" id="cat-descripcion" placeholder="Descripción breve (opcional)" class="flex-1 min-w-[180px] bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                        <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white px-4 py-2 rounded text-sm font-medium transition">
+                            + Categoría
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Columna 2: Venta Rápida en Mostrador -->
+            <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800 h-fit">
+                <h2 class="text-lg font-bold mb-1">Registrar Venta de Producto</h2>
+                <p class="text-xs text-zinc-400 mb-4">Ideal cuando un cliente se lleva un producto al terminar su cita.</p>
+
+                <form id="form-venta" class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Producto</label>
+                        <select id="venta-producto" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                            <option value="">Selecciona un producto...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Cantidad</label>
+                        <input type="number" min="1" value="1" id="venta-cantidad" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Cliente (opcional)</label>
+                        <input type="text" id="venta-comprador" placeholder="Nombre del cliente" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Teléfono (opcional)</label>
+                        <input type="tel" id="venta-telefono" placeholder="Teléfono / WhatsApp" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Correo (opcional)</label>
+                        <input type="email" id="venta-email" placeholder="correo@ejemplo.com" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+
+                    <div class="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-3 flex justify-between items-center">
+                        <span class="text-xs text-zinc-400">Total a cobrar:</span>
+                        <span id="venta-total-preview" class="text-lg font-bold text-emerald-400">$0.00</span>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded transition">
+                        Cobrar y Descontar Stock
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de Productos -->
+        <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-7xl mb-8">
+            <div class="p-4 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-lg font-bold">Inventario de Productos</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-zinc-300">
+                    <thead class="bg-zinc-800/60 text-white border-b border-zinc-800">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Producto</th>
+                            <th class="px-4 py-3 font-semibold">SKU</th>
+                            <th class="px-4 py-3 font-semibold">Categoría</th>
+                            <th class="px-4 py-3 font-semibold">Precio</th>
+                            <th class="px-4 py-3 font-semibold">Stock</th>
+                            <th class="px-4 py-3 font-semibold">Estado</th>
+                            <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-productos" class="divide-y divide-zinc-800">
+                        <tr>
+                            <td colspan="7" class="px-4 py-6 text-center text-zinc-400">Cargando productos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Historial de Ventas -->
+        <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-7xl">
+            <div class="p-4 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-lg font-bold">Historial de Ventas</h2>
+            </div>
+            <div id="lista-ventas" class="p-4 space-y-3">
+                <p class="text-zinc-400 text-sm">Cargando ventas...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Editar Producto -->
+    <div id="modal-editar-producto" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
+                <h3 class="text-lg font-bold">Editar Producto</h3>
+                <button onclick="cerrarModalEditar()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <form id="form-editar-producto" class="space-y-3">
+                <input type="hidden" id="edit-prod-id">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Nombre</label>
+                    <input type="text" id="edit-prod-nombre" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Categoría</label>
+                        <select id="edit-prod-categoria" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                            <option value="">Sin categoría</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">SKU</label>
+                        <input type="text" id="edit-prod-sku" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Precio ($)</label>
+                        <input type="number" step="0.01" min="0" id="edit-prod-precio" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Stock actual</label>
+                        <input type="number" min="0" id="edit-prod-stock" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Stock mínimo</label>
+                        <input type="number" min="0" id="edit-prod-stock-min" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Descripción</label>
+                    <input type="text" id="edit-prod-descripcion" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="cerrarModalEditar()" class="px-4 py-2 rounded bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-zinc-100 text-black text-sm font-semibold hover:bg-white">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        const rolUsuario = localStorage.getItem('rol');
+        if (rolUsuario !== '1') {
+            window.location.href = 'dashboard.html';
+        }
+
+        let productosCache = [];
+        let categoriasCache = [];
+
+        async function cargarCategorias() {
+            try {
+                const res = await fetch('/api/catalogo/categorias', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) return;
+                categoriasCache = await res.json();
+
+                const select = document.getElementById('prod-categoria');
+                const selectEdit = document.getElementById('edit-prod-categoria');
+                select.innerHTML = '<option value="">Sin categoría</option>';
+                selectEdit.innerHTML = '<option value="">Sin categoría</option>';
+
+                categoriasCache.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+                    selectEdit.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+                });
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+
+        function actualizarTotalVenta() {
+            const prodId = Number(document.getElementById('venta-producto').value);
+            const cant = Math.max(1, Number(document.getElementById('venta-cantidad').value) || 1);
+            const prod = productosCache.find(p => Number(p.id) === prodId);
+            const total = prod ? Number(prod.precio) * cant : 0;
+            document.getElementById('venta-total-preview').textContent = `$${total.toFixed(2)}`;
+        }
+
+        async function cargarProductos() {
+            const tbody = document.getElementById('tabla-productos');
+            const selectVenta = document.getElementById('venta-producto');
+
+            try {
+                const res = await fetch('/api/catalogo/productos', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error al cargar productos.</td></tr>';
+                    return;
+                }
+
+                productosCache = await res.json();
+
+                selectVenta.innerHTML = '<option value="">Selecciona un producto...</option>';
+                productosCache
+                    .filter(p => p.activo && Number(p.stock_actual) > 0)
+                    .forEach(p => {
+                        selectVenta.innerHTML += `<option value="${p.id}">${p.nombre} — $${Number(p.precio).toFixed(2)} (Stock: ${p.stock_actual})</option>`;
+                    });
+
+                actualizarTotalVenta();
+
+                if (productosCache.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-zinc-400">No hay productos registrados todavía.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                productosCache.forEach(p => {
+                    const stockBajo = Number(p.stock_actual) <= Number(p.stock_minimo);
+                    const stockClase = stockBajo ? 'text-amber-400 font-bold' : 'text-white';
+                    const estadoBadge = p.activo
+                        ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/40">Activo</span>'
+                        : '<span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Inactivo</span>';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-zinc-800/30 transition">
+                            <td class="px-4 py-3">
+                                <p class="font-medium text-white">${p.nombre}</p>
+                                ${p.descripcion ? `<p class="text-xs text-zinc-400">${p.descripcion}</p>` : ''}
+                            </td>
+                            <td class="px-4 py-3 text-zinc-400">${p.sku || '—'}</td>
+                            <td class="px-4 py-3 text-zinc-300">${p.categoria_nombre || 'Sin categoría'}</td>
+                            <td class="px-4 py-3 text-emerald-400 font-semibold">$${Number(p.precio).toFixed(2)}</td>
+                            <td class="px-4 py-3 ${stockClase}">
+                                ${p.stock_actual} ${stockBajo ? '<span class="text-[11px] ml-1">(Bajo)</span>' : ''}
+                            </td>
+                            <td class="px-4 py-3">${estadoBadge}</td>
+                            <td class="px-4 py-3 text-right space-x-2">
+                                <button onclick="abrirModalEditar(${p.id})" class="text-blue-400 hover:text-blue-300 text-xs font-medium">Editar</button>
+                                <button onclick="toggleActivo(${p.id}, ${!p.activo})" class="text-zinc-400 hover:text-white text-xs">
+                                    ${p.activo ? 'Desactivar' : 'Activar'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error de conexión.</td></tr>';
+            }
+        }
+
+        async function cargarVentas() {
+            const contenedor = document.getElementById('lista-ventas');
+            try {
+                const res = await fetch('/api/catalogo/ventas', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) {
+                    contenedor.innerHTML = '<p class="text-red-400 text-sm">No se pudieron cargar las ventas.</p>';
+                    return;
+                }
+                const ventas = await res.json();
+                if (ventas.length === 0) {
+                    contenedor.innerHTML = '<p class="text-zinc-400 text-sm">No hay ventas registradas aún.</p>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                ventas.forEach(v => {
+                    const itemsTexto = Array.isArray(v.items) && v.items.length > 0
+                        ? v.items.map(i => `${i.cantidad}x ${i.producto_nombre || 'Producto'} ($${Number(i.precio_unitario).toFixed(2)})`).join(', ')
+                        : 'Detalle no disponible';
+
+                    const cancelada = v.estado === 'CANCELADA';
+                    const badgeColor = cancelada
+                        ? 'text-red-400 border-red-500/40'
+                        : 'text-emerald-400 border-zinc-700';
+
+                    const botonCancelar = !cancelada
+                        ? `<button onclick="cancelarVenta('${v.id}')" class="text-xs text-red-400 hover:text-red-300 border border-red-800/60 px-2.5 py-1 rounded transition">Cancelar venta</button>`
+                        : '';
+
+                    contenedor.innerHTML += `
+                        <div class="bg-[#0a0a0a] border ${badgeColor} rounded-lg p-3.5 flex flex-wrap justify-between items-center gap-3 text-sm">
+                            <div>
+                                <p class="font-semibold text-white">${itemsTexto}</p>
+                                <p class="text-xs text-zinc-400 mt-0.5">
+                                    Comprador: ${v.nombre_comprador || 'Mostrador'}${v.telefono_comprador ? ` · Tel: ${v.telefono_comprador}` : ''} · ${v.metodo_pago} · ${v.tipo_entrega}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-emerald-400">$${Number(v.total).toFixed(2)}</span>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-900 ${cancelada ? 'text-red-400' : 'text-emerald-400'}">${v.estado}</span>
+                                ${botonCancelar}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+        }
+
+        function abrirModalEditar(id) {
+            const p = productosCache.find(item => Number(item.id) === Number(id));
+            if (!p) return;
+
+            document.getElementById('edit-prod-id').value = p.id;
+            document.getElementById('edit-prod-nombre').value = p.nombre || '';
+            document.getElementById('edit-prod-categoria').value = p.categoria_id || '';
+            document.getElementById('edit-prod-sku').value = p.sku || '';
+            document.getElementById('edit-prod-precio').value = p.precio;
+            document.getElementById('edit-prod-stock').value = p.stock_actual;
+            document.getElementById('edit-prod-stock-min').value = p.stock_minimo;
+            document.getElementById('edit-prod-descripcion').value = p.descripcion || '';
+
+            const modal = document.getElementById('modal-editar-producto');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalEditar() {
+            const modal = document.getElementById('modal-editar-producto');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('form-editar-producto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-prod-id').value;
+            const payload = {
+                nombre: document.getElementById('edit-prod-nombre').value,
+                categoria_id: document.getElementById('edit-prod-categoria').value || null,
+                sku: document.getElementById('edit-prod-sku').value,
+                precio: document.getElementById('edit-prod-precio').value,
+                stock_actual: document.getElementById('edit-prod-stock').value,
+                stock_minimo: document.getElementById('edit-prod-stock-min').value,
+                descripcion: document.getElementById('edit-prod-descripcion').value
+            };
+
+            try {
+                const res = await fetch(`/api/catalogo/productos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    cerrarModalEditar();
+                    await cargarProductos();
+                } else {
+                    alert(data.message || 'No se pudo actualizar el producto');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        document.getElementById('form-categoria').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('cat-nombre').value;
+            const descripcion = document.getElementById('cat-descripcion').value;
+
+            try {
+                const res = await fetch('/api/catalogo/categorias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nombre, descripcion })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Categoría agregada');
+                    document.getElementById('form-categoria').reset();
+                    await cargarCategorias();
+                } else {
+                    alert(data.message || 'No se pudo crear la categoría');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        document.getElementById('form-producto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                nombre: document.getElementById('prod-nombre').value,
+                categoria_id: document.getElementById('prod-categoria').value || null,
+                sku: document.getElementById('prod-sku').value,
+                precio: document.getElementById('prod-precio').value,
+                stock_actual: document.getElementById('prod-stock').value,
+                stock_minimo: document.getElementById('prod-stock-min').value,
+                descripcion: document.getElementById('prod-descripcion').value
+            };
+
+            try {
+                const res = await fetch('/api/catalogo/productos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Producto guardado');
+                    document.getElementById('form-producto').reset();
+                    document.getElementById('prod-stock').value = 10;
+                    document.getElementById('prod-stock-min').value = 3;
+                    await cargarProductos();
+                } else {
+                    alert(data.message || 'No se pudo guardar el producto');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        document.getElementById('venta-producto').addEventListener('change', actualizarTotalVenta);
+        document.getElementById('venta-cantidad').addEventListener('input', actualizarTotalVenta);
+
+        document.getElementById('form-venta').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                producto_id: document.getElementById('venta-producto').value,
+                cantidad: document.getElementById('venta-cantidad').value,
+                nombre_comprador: document.getElementById('venta-comprador').value,
+                telefono_comprador: document.getElementById('venta-telefono').value,
+                email_comprador: document.getElementById('venta-email').value,
+                tipo_entrega: 'RECOGER_LOCAL',
+                metodo_pago: 'EFECTIVO_LOCAL',
+                estado: 'ENTREGADA'
+            };
+
+            try {
+                const res = await fetch('/api/catalogo/ventas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`${data.message} — Total: $${Number(data.total).toFixed(2)}`);
+                    document.getElementById('form-venta').reset();
+                    document.getElementById('venta-cantidad').value = 1;
+                    await cargarProductos();
+                    await cargarVentas();
+                } else {
+                    alert(data.message || 'No se pudo registrar la venta');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        async function toggleActivo(id, nuevoEstado) {
+            try {
+                const res = await fetch(`/api/catalogo/productos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ activo: nuevoEstado })
+                });
+                if (res.ok) await cargarProductos();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function cancelarVenta(idVenta) {
+            if (!confirm('¿Cancelar esta venta y devolver su cantidad al stock?')) return;
+            try {
+                const res = await fetch(`/api/catalogo/ventas/${idVenta}/estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ estado: 'CANCELADA' })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || 'Venta cancelada');
+                    await cargarProductos();
+                    await cargarVentas();
+                } else {
+                    alert(data.message || 'No se pudo cancelar la venta');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        (async () => {
+            await cargarCategorias();
+            await cargarProductos();
+            await cargarVentas();
+        })();
+    </script>
+</body>
+</html>

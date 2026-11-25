@@ -8,12 +8,49 @@
 </head>
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
 
-    <!-- Aquí iría tu Sidebar (cópialo de servicios.html) -->
+    <!-- Menú Lateral (Sidebar) idéntico al del Dashboard -->
+    <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
+        <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
+            <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
+            <a href="citas.html" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white transition">Agenda de Citas</a>
+            
+            <!-- Botones administrativos con ID para ocultarlos -->
+            <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
+            <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
+            <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+        </nav>
+        <div class="p-4 border-t border-zinc-800">
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
     
-    <main class="flex-1 p-10">
-        <h1 class="text-3xl font-bold mb-8">Agendar Nueva Cita</h1>
+    <main class="flex-1 p-10 overflow-y-auto">
+        <!-- Encabezado con Botón de Regreso -->
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">Agenda y Citas</h1>
+            <a href="dashboard.html" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition border border-zinc-700 text-sm font-medium">
+                ← Volver al Dashboard
+            </a>
+        </header>
 
         <form id="form-citas" class="bg-zinc-900 p-6 rounded-lg max-w-2xl">
+            <h2 class="text-xl font-bold mb-4">Agendar Nueva Cita</h2>
+
+            <!-- Enlace rápido a cliente existente (rol 3) -->
+            <div id="wrap-cliente-existente" class="mb-4">
+                <label class="block text-xs mb-1 text-gray-400">Vincular Cliente Registrado (opcional)</label>
+                <select id="cliente_registrado" onchange="autocompletarCliente()" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 text-sm">
+                    <option value="">— Nuevo / Invitado —</option>
+                </select>
+            </div>
+
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <!-- Datos del Cliente -->
                 <div>
@@ -26,7 +63,7 @@
                 </div>
 
                 <!-- Selección de Barbero y Servicio -->
-                <div>
+                <div id="campo-barbero">
                     <label class="block text-sm mb-1 text-gray-400">Barbero</label>
                     <select id="barbero_id" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700 focus:border-zinc-500 cursor-pointer" required>
                         <option value="" disabled selected>Selecciona un barbero...</option>
@@ -46,7 +83,9 @@
                 </div>
                 <div>
                     <label class="block text-sm mb-1 text-gray-400">Hora</label>
-                    <input type="time" id="hora_inicio" class="w-full bg-zinc-800 text-white p-2 rounded border border-zinc-700" required>
+                    <select id="hora_inicio" class="w-full bg-zinc-800 text-white p-2 rounded" required>
+                        <option value="">Selecciona una hora...</option>
+                    </select>
                 </div>
             </div>
 
@@ -54,18 +93,88 @@
                 Confirmar Cita
             </button>
         </form>
+
+        <!-- Consulta de Agenda por Fecha -->
+        <section class="bg-zinc-900 p-6 rounded-lg max-w-4xl mt-8">
+            <div class="flex flex-wrap gap-4 items-end justify-between mb-5 border-b border-zinc-800 pb-4">
+                <h2 class="text-xl font-bold">Citas Programadas</h2>
+                <div class="flex flex-wrap gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Fecha</label>
+                        <input type="date" id="consulta_fecha" class="bg-zinc-800 text-white p-2 rounded border border-zinc-700 text-sm">
+                    </div>
+                    <div id="filtro-barbero-wrap">
+                        <label class="block text-xs text-gray-400 mb-1">Barbero</label>
+                        <select id="consulta_barbero" class="bg-zinc-800 text-white p-2 rounded border border-zinc-700 text-sm">
+                            <option value="TODOS">Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lista-citas-agenda" class="space-y-3">
+                <p class="text-gray-400 text-sm">Cargando citas...</p>
+            </div>
+        </section>
     </main>
 
-    <!-- Script para enviar y traer los datos al Backend -->
     <script>
-        console.log("¡El archivo JS sí se está leyendo!"); // Prueba de vida
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
 
-        // Función para cargar las listas desde la base de datos
+        const rolUsuario = localStorage.getItem('rol');
+        const usuarioId = localStorage.getItem('usuario_id');
+        let idBarberoActual = null;
+        let clientesRegistradosCache = [];
+
+        if (rolUsuario !== '1') {
+            document.getElementById('menu-catalogo').style.display = 'none';
+            document.getElementById('menu-clientes').style.display = 'none';
+            document.getElementById('menu-barberos').style.display = 'none';
+            document.getElementById('menu-servicios').style.display = 'none';
+            document.getElementById('filtro-barbero-wrap').style.display = 'none';
+            document.getElementById('wrap-cliente-existente').style.display = 'none';
+        }
+
+        function obtenerFechaHoyLocal() {
+            const fecha = new Date();
+            fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
+            return fecha.toISOString().split('T')[0];
+        }
+
+        function obtenerHoraActual24() {
+            const ahora = new Date();
+            const hh = String(ahora.getHours()).padStart(2, '0');
+            const mm = String(ahora.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        const hoyLocal = obtenerFechaHoyLocal();
+        document.getElementById('fecha_cita').min = hoyLocal;
+        document.getElementById('consulta_fecha').value = hoyLocal;
+
+        function formatoHora12(horaStr) {
+            const [hora, min] = horaStr.split(':');
+            return new Date(2000, 0, 1, hora, min).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        function autocompletarCliente() {
+            const idSel = document.getElementById('cliente_registrado').value;
+            if (!idSel) return;
+            const cli = clientesRegistradosCache.find(c => String(c.id) === String(idSel));
+            if (!cli) return;
+            const nombreCompleto = `${cli.nombre || ''} ${cli.apellidos || ''}`.trim();
+            if (nombreCompleto) document.getElementById('nombre_invitado').value = nombreCompleto;
+            if (cli.telefono) document.getElementById('telefono_invitado').value = cli.telefono;
+        }
+
         async function cargarOpciones() {
-            console.log("Iniciando carga de opciones...");
             try {
-                const token = localStorage.getItem('token'); 
-                
                 const configuracion = {
                     method: 'GET',
                     headers: {
@@ -74,74 +183,264 @@
                     }
                 };
 
-                // 1. Cargar Barberos 
+                // 1. Cargar Barberos
                 const resBarberos = await fetch('/api/barberos', configuracion);
                 if (resBarberos.ok) {
                     const barberos = await resBarberos.json();
-                    console.log("Barberos encontrados:", barberos);
                     const selectBarbero = document.getElementById('barbero_id');
+                    const selectConsultaBarbero = document.getElementById('consulta_barbero');
+
                     barberos.forEach(barbero => {
                         selectBarbero.innerHTML += `<option value="${barbero.id}">${barbero.nombre}</option>`;
+                        selectConsultaBarbero.innerHTML += `<option value="${barbero.id}">${barbero.nombre}</option>`;
                     });
-                } else {
-                    console.log("Error al traer barberos. Código:", resBarberos.status);
+
+                    if (rolUsuario !== '1') {
+                        document.getElementById('campo-barbero').style.display = 'none';
+                        const nombreUsuario = localStorage.getItem('nombre');
+                        const barberoCorrecto = barberos.find(b => b.nombre.includes(nombreUsuario));
+
+                        if (barberoCorrecto) {
+                            selectBarbero.value = barberoCorrecto.id;
+                            idBarberoActual = barberoCorrecto.id;
+                        }
+                    }
                 }
 
-                // 2. Cargar Servicios 
+                // 2. Cargar Servicios
                 const resServicios = await fetch('/api/servicios', configuracion);
                 if (resServicios.ok) {
                     const servicios = await resServicios.json();
-                    console.log("Servicios encontrados:", servicios);
                     const selectServicio = document.getElementById('servicio_id');
                     servicios.forEach(servicio => {
                         selectServicio.innerHTML += `<option value="${servicio.id}">${servicio.nombre} - $${servicio.precio}</option>`;
                     });
                 }
+
+                // 3. Si es admin, cargar clientes (rol 3) para vincular rápido
+                if (rolUsuario === '1') {
+                    const resClientes = await fetch('/api/clientes', configuracion);
+                    if (resClientes.ok) {
+                        clientesRegistradosCache = await resClientes.json();
+                        const selectCli = document.getElementById('cliente_registrado');
+                        clientesRegistradosCache.forEach(cli => {
+                            const nom = `${cli.nombre || ''} ${cli.apellidos || ''}`.trim() || 'Cliente';
+                            selectCli.innerHTML += `<option value="${cli.id}">${nom} (${cli.telefono || 'sin tel'})</option>`;
+                        });
+                    }
+                }
+
+                await cargarCitasAgenda();
             } catch (error) {
                 console.error("Error al cargar las opciones:", error);
             }
         }
 
-        // Ejecutar directo y sin pedir permiso
         cargarOpciones();
 
-        // Función para enviar la nueva cita
+        async function cargarHorariosDisponibles() {
+            const barberoId = document.getElementById('barbero_id').value;
+            const servicioId = document.getElementById('servicio_id').value;
+            const fechaCita = document.getElementById('fecha_cita').value;
+            const selectHora = document.getElementById('hora_inicio');
+
+            if (!barberoId || !servicioId || !fechaCita) {
+                return;
+            }
+
+            try {
+                const respuesta = await fetch('/api/citas/horarios-disponibles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        fecha: fechaCita,
+                        barbero_id: barberoId,
+                        servicio_id: servicioId
+                    })
+                });
+
+                const datos = await respuesta.json();
+                selectHora.innerHTML = '<option value="">Selecciona una hora...</option>';
+
+                let slots = datos.horariosDisponibles || [];
+                const hoy = obtenerFechaHoyLocal();
+                if (fechaCita === hoy) {
+                    const horaAhora = obtenerHoraActual24();
+                    slots = slots.filter(h => String(h.hora24) > horaAhora);
+                }
+
+                if (slots.length > 0) {
+                    slots.forEach(horario => {
+                        const opcion = document.createElement('option');
+                        opcion.value = horario.hora24;
+                        opcion.textContent = horario.hora12;
+                        selectHora.appendChild(opcion);
+                    });
+                } else {
+                    selectHora.innerHTML = '<option value="">No hay horarios disponibles para este día</option>';
+                }
+            } catch (error) {
+                console.error("Error al traer los horarios:", error);
+            }
+        }
+
+        document.getElementById('barbero_id').addEventListener('change', cargarHorariosDisponibles);
+        document.getElementById('servicio_id').addEventListener('change', cargarHorariosDisponibles);
+        document.getElementById('fecha_cita').addEventListener('change', cargarHorariosDisponibles);
+
         document.getElementById('form-citas').addEventListener('submit', async (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
+
+            const fechaSeleccionada = document.getElementById('fecha_cita').value;
+            const horaSeleccionada = document.getElementById('hora_inicio').value;
+            if (!horaSeleccionada) {
+                alert('Selecciona una hora válida.');
+                return;
+            }
 
             const nuevaCita = {
                 nombre_invitado: document.getElementById('nombre_invitado').value,
                 telefono_invitado: document.getElementById('telefono_invitado').value,
                 barbero_id: document.getElementById('barbero_id').value,
                 servicio_id: document.getElementById('servicio_id').value,
-                fecha_cita: document.getElementById('fecha_cita').value,
-                hora_inicio: document.getElementById('hora_inicio').value
+                fecha_cita: fechaSeleccionada,
+                hora_inicio: horaSeleccionada
             };
 
             try {
-                const token = localStorage.getItem('token'); 
-                
                 const response = await fetch('/api/citas', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(nuevaCita)
                 });
 
                 if (response.ok) {
-                    alert('¡Cita agendada exitosamente en la base de datos!');
-                    document.getElementById('form-citas').reset(); 
+                    alert('¡Cita agendada exitosamente!');
+                    document.getElementById('cliente_registrado').value = '';
+                    document.getElementById('nombre_invitado').value = '';
+                    document.getElementById('telefono_invitado').value = '';
+                    document.getElementById('fecha_cita').value = '';
+                    document.getElementById('hora_inicio').innerHTML = '<option value="">Selecciona una hora...</option>';
+                    document.getElementById('servicio_id').value = '';
+
+                    document.getElementById('consulta_fecha').value = fechaSeleccionada;
+                    await cargarCitasAgenda();
                 } else {
                     const errorData = await response.json();
-                    alert(`Error: ${errorData.message}`);
+                    alert(`Error: ${errorData.message || 'No se pudo agendar la cita'}`);
                 }
             } catch (error) {
                 console.error('Error al guardar la cita:', error);
                 alert('No se pudo conectar con el servidor.');
             }
         });
+
+        async function cargarCitasAgenda() {
+            const contenedor = document.getElementById('lista-citas-agenda');
+            const fecha = document.getElementById('consulta_fecha').value;
+            const barberoIdFiltro = rolUsuario === '1'
+                ? document.getElementById('consulta_barbero').value
+                : (idBarberoActual || usuarioId);
+
+            if (!fecha) return;
+
+            try {
+                const res = await fetch('/api/citas/por-fecha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fecha, barbero_id: barberoIdFiltro })
+                });
+
+                if (!res.ok) {
+                    contenedor.innerHTML = '<p class="text-red-400 text-sm">No se pudieron cargar las citas.</p>';
+                    return;
+                }
+
+                const citas = await res.json();
+                if (citas.length === 0) {
+                    contenedor.innerHTML = '<p class="text-gray-400 text-sm">No hay citas para esta fecha.</p>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                citas.forEach(cita => {
+                    let borde = 'border-zinc-600';
+                    let acciones = `
+                        <button onclick="cambiarEstadoAgenda('${cita.id}', 'COMPLETADA')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 px-3 py-1 rounded text-xs hover:bg-emerald-600/40 transition">Cobrar</button>
+                        <button onclick="cambiarEstadoAgenda('${cita.id}', 'CANCELADA')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">Cancelar</button>
+                    `;
+
+                    if (cita.estado === 'COMPLETADA') {
+                        borde = 'border-emerald-500 opacity-80';
+                        acciones = '<span class="text-xs text-emerald-400 font-semibold">✓ COMPLETADA</span>';
+                    } else if (cita.estado === 'CANCELADA') {
+                        borde = 'border-red-500 opacity-60';
+                        acciones = '<span class="text-xs text-red-400 font-semibold">✗ CANCELADA</span>';
+                    }
+
+                    contenedor.innerHTML += `
+                        <div class="bg-zinc-800 p-4 rounded border-l-4 ${borde} flex justify-between items-center gap-4">
+                            <div>
+                                <p class="font-bold text-white">${formatoHora12(cita.hora_inicio)} - ${cita.servicio}</p>
+                                <p class="text-sm text-gray-300">Cliente: ${cita.nombre_invitado} · Tel: ${cita.telefono_invitado}</p>
+                                ${rolUsuario === '1' && cita.nombre_barbero ? `<p class="text-xs text-blue-400 mt-1">Barbero: ${cita.nombre_barbero}</p>` : ''}
+                            </div>
+                            <div class="flex flex-col gap-1 items-end">
+                                ${acciones}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error al consultar citas:', error);
+            }
+        }
+
+        async function cambiarEstadoAgenda(idCita, nuevoEstado) {
+            if (nuevoEstado === 'CANCELADA' && !confirm('¿Seguro que deseas cancelar esta cita?')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/citas/${idCita}/estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    await cargarCitasAgenda();
+                    if (document.getElementById('fecha_cita').value) {
+                        await cargarHorariosDisponibles();
+                    }
+                } else {
+                    alert(data.message || 'No se pudo actualizar el estado de la cita.');
+                }
+            } catch (error) {
+                console.error('Error al actualizar estado:', error);
+            }
+        }
+
+        document.getElementById('consulta_fecha').addEventListener('change', cargarCitasAgenda);
+        document.getElementById('consulta_barbero').addEventListener('change', cargarCitasAgenda);
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html>

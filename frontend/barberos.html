@@ -15,9 +15,11 @@
         </div>
         <nav class="flex-1 p-4 space-y-2">
             <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
-            <a href="barberos.html" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Barberos</a>
-            <a href="#" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
-            <a href="servicios.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+            <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
+            <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Barberos</a>
+            <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
             <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
@@ -30,7 +32,7 @@
     <main class="flex-1 p-8 overflow-y-auto">
         <header class="mb-10">
             <h1 class="text-3xl font-bold">Gestión de Barberos</h1>
-            <p class="text-zinc-400 mt-1">Registra y administra a tu equipo de trabajo.</p>
+            <p class="text-zinc-400 mt-1">Registra, administra turnos y gestiona a tu equipo de trabajo (Horario de barbería: 11:00 a 21:00).</p>
         </header>
         
         <!-- Formulario de Registro -->
@@ -54,9 +56,10 @@
                 </button>
             </form>
         </div>
+        
         <!-- Tabla de Barberos -->
-        <div class="mt-10 max-w-4xl">
-            <h2 class="text-xl font-bold mb-4">Plantilla Activa</h2>
+        <div class="mt-10 max-w-5xl">
+            <h2 class="text-xl font-bold mb-4">Plantilla</h2>
             <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden">
                 <table class="w-full text-left text-sm text-zinc-400">
                     <thead class="bg-zinc-800/50 text-white border-b border-zinc-800">
@@ -64,6 +67,7 @@
                             <th class="px-4 py-3 font-semibold">Nombre</th>
                             <th class="px-4 py-3 font-semibold">Teléfono</th>
                             <th class="px-4 py-3 font-semibold">Especialidad</th>
+                            <th class="px-4 py-3 font-semibold">Estado</th>
                             <th class="px-4 py-3 font-semibold text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -75,9 +79,84 @@
         </div>
     </main>
 
+    <!-- Modal Editar Barbero -->
+    <div id="modal-editar-barbero" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
+                <h3 class="text-lg font-bold text-white">Editar Barbero</h3>
+                <button onclick="cerrarModalEditarBarbero()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <form id="form-editar-barbero" class="space-y-4">
+                <input type="hidden" id="edit-barb-id">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Nombre Completo</label>
+                    <input type="text" id="edit-barb-nombre" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Teléfono</label>
+                    <input type="tel" id="edit-barb-telefono" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Especialidad</label>
+                    <input type="text" id="edit-barb-especialidad" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-sm text-white">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="cerrarModalEditarBarbero()" class="px-4 py-2 rounded bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded bg-zinc-100 text-black text-sm font-semibold hover:bg-white">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Horarios -->
+    <div id="modal-horarios" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-4 mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Horarios del Barbero</h3>
+                    <p id="modal-barbero-nombre" class="text-sm text-zinc-400"></p>
+                </div>
+                <button onclick="cerrarModalHorarios()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+
+            <form id="form-horarios" class="space-y-3">
+                <div id="contenedor-dias-horario" class="space-y-2">
+                    <!-- Filas de días generadas por JS -->
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-zinc-800 mt-4">
+                    <button type="button" onclick="cerrarModalHorarios()" class="px-4 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-500 transition">
+                        Guardar Horarios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
+
+        const rolUsuario = localStorage.getItem('rol');
+        if (rolUsuario !== '1') {
+            window.location.href = 'dashboard.html';
+        }
+
+        const DIAS_SEMANA = [
+            { dia: 1, nombre: 'Lunes' },
+            { dia: 2, nombre: 'Martes' },
+            { dia: 3, nombre: 'Miércoles' },
+            { dia: 4, nombre: 'Jueves' },
+            { dia: 5, nombre: 'Viernes' },
+            { dia: 6, nombre: 'Sábado' },
+            { dia: 0, nombre: 'Domingo' }
+        ];
+
+        let barberoSeleccionadoId = null;
+        let barberosCache = [];
 
         document.getElementById('form-barbero').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -100,8 +179,8 @@
 
                 if (response.ok) {
                     alert('¡Barbero registrado con éxito!');
-                    document.getElementById('form-barbero').reset(); // Limpia el formulario
-                    cargarBarberos(); // Recarga la lista de barberos
+                    document.getElementById('form-barbero').reset(); 
+                    cargarBarberos();
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -123,18 +202,30 @@
                 });
                 
                 if (response.ok) {
-                    const barberos = await response.json();
+                    barberosCache = await response.json();
                     const tbody = document.getElementById('lista-barberos');
-                    tbody.innerHTML = ''; // Limpiamos antes de dibujar
+                    tbody.innerHTML = ''; 
 
-                    barberos.forEach(barbero => {
+                    barberosCache.forEach(barbero => {
+                        const estaActivo = barbero.activo !== false;
+                        const nombreEscapado = barbero.nombre.replace(/'/g, "\\'");
+                        const badgeEstado = estaActivo
+                            ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/40">Activo</span>'
+                            : '<span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Inactivo</span>';
+
                         tbody.innerHTML += `
                             <tr class="hover:bg-zinc-800/30 transition">
                                 <td class="px-4 py-3 text-white font-medium">${barbero.nombre}</td>
                                 <td class="px-4 py-3">${barbero.telefono}</td>
                                 <td class="px-4 py-3">${barbero.especialidad}</td>
-                                <td class="px-4 py-3 text-right">
-                                    <button class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
+                                <td class="px-4 py-3">${badgeEstado}</td>
+                                <td class="px-4 py-3 text-right space-x-3">
+                                    <button onclick="abrirModalEditarBarbero('${barbero.id}')" class="text-amber-400 hover:text-amber-300 transition text-sm font-medium">Editar</button>
+                                    <button onclick="abrirModalHorarios('${barbero.id}', '${nombreEscapado}')" class="text-blue-400 hover:text-blue-300 transition text-sm font-medium">Horarios</button>
+                                    <button onclick="toggleActivoBarbero('${barbero.id}', ${!estaActivo})" class="text-zinc-300 hover:text-white transition text-sm">
+                                        ${estaActivo ? 'Desactivar' : 'Activar'}
+                                    </button>
+                                    <button onclick="borrarBarbero('${barbero.id}')" class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
                                 </td>
                             </tr>
                         `;
@@ -145,7 +236,212 @@
             }
         }
 
-        // Ejecutar al cargar la página
+        function abrirModalEditarBarbero(id) {
+            const b = barberosCache.find(item => String(item.id) === String(id));
+            if (!b) return;
+
+            document.getElementById('edit-barb-id').value = b.id;
+            document.getElementById('edit-barb-nombre').value = b.nombre || '';
+            document.getElementById('edit-barb-telefono').value = b.telefono || '';
+            document.getElementById('edit-barb-especialidad').value = b.especialidad || '';
+
+            const modal = document.getElementById('modal-editar-barbero');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalEditarBarbero() {
+            const modal = document.getElementById('modal-editar-barbero');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('form-editar-barbero').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-barb-id').value;
+            const nombre = document.getElementById('edit-barb-nombre').value;
+            const telefono = document.getElementById('edit-barb-telefono').value;
+            const especialidad = document.getElementById('edit-barb-especialidad').value;
+
+            try {
+                const response = await fetch(`/api/barberos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nombre, telefono, especialidad })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    cerrarModalEditarBarbero();
+                    cargarBarberos();
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo actualizar'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión.');
+            }
+        });
+
+        async function toggleActivoBarbero(id, nuevoEstado) {
+            try {
+                const response = await fetch(`/api/barberos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ activo: nuevoEstado })
+                });
+                if (response.ok) {
+                    cargarBarberos();
+                } else {
+                    alert('No se pudo cambiar el estado del barbero.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function borrarBarbero(idBarbero) {
+            const confirmar = confirm("¿Estás seguro de que deseas dar de baja a este barbero?");
+            if (!confirmar) return;
+
+            try {
+                const response = await fetch(`/api/barberos/${idBarbero}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert("Barbero eliminado exitosamente");
+                    cargarBarberos();
+                } else {
+                    alert("Hubo un problema al intentar eliminar.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function renderizarFilasHorario(horariosGuardados = []) {
+            const contenedor = document.getElementById('contenedor-dias-horario');
+            contenedor.innerHTML = '';
+
+            DIAS_SEMANA.forEach(({ dia, nombre }) => {
+                const existente = horariosGuardados.find(h => Number(h.dia_semana) === dia);
+                const esDescanso = existente ? Boolean(existente.es_descanso) : false;
+                const horaInicio = existente && existente.hora_inicio ? existente.hora_inicio.slice(0, 5) : '11:00';
+                const horaFin = existente && existente.hora_fin ? existente.hora_fin.slice(0, 5) : '21:00';
+
+                contenedor.innerHTML += `
+                    <div class="grid grid-cols-12 gap-2 items-center bg-[#0a0a0a] border border-zinc-800 p-2.5 rounded-lg text-sm">
+                        <div class="col-span-3 font-medium text-white">${nombre}</div>
+                        <div class="col-span-3">
+                            <label class="text-xs text-zinc-500 block">Entrada</label>
+                            <input type="time" id="inicio-${dia}" min="11:00" max="21:00" value="${horaInicio}" ${esDescanso ? 'disabled' : ''}
+                                class="w-full bg-[#111111] border border-zinc-700 rounded px-2 py-1 text-white disabled:opacity-40">
+                        </div>
+                        <div class="col-span-3">
+                            <label class="text-xs text-zinc-500 block">Salida</label>
+                            <input type="time" id="fin-${dia}" min="11:00" max="21:00" value="${horaFin}" ${esDescanso ? 'disabled' : ''}
+                                class="w-full bg-[#111111] border border-zinc-700 rounded px-2 py-1 text-white disabled:opacity-40">
+                        </div>
+                        <div class="col-span-3 flex items-center justify-end gap-2 pt-3">
+                            <input type="checkbox" id="descanso-${dia}" ${esDescanso ? 'checked' : ''} onchange="toggleDescanso(${dia})"
+                                class="rounded bg-[#111111] border-zinc-700">
+                            <label for="descanso-${dia}" class="text-zinc-300 text-xs cursor-pointer">Descanso</label>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleDescanso(dia) {
+            const checked = document.getElementById(`descanso-${dia}`).checked;
+            const inputInicio = document.getElementById(`inicio-${dia}`);
+            const inputFin = document.getElementById(`fin-${dia}`);
+
+            inputInicio.disabled = checked;
+            inputFin.disabled = checked;
+        }
+
+        async function abrirModalHorarios(idBarbero, nombreBarbero) {
+            barberoSeleccionadoId = idBarbero;
+            document.getElementById('modal-barbero-nombre').textContent = `Barbero: ${nombreBarbero}`;
+            renderizarFilasHorario([]);
+
+            const modal = document.getElementById('modal-horarios');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            try {
+                const response = await fetch(`/api/horarios/${idBarbero}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    renderizarFilasHorario(data);
+                }
+            } catch (error) {
+                console.error("Error al cargar horarios del barbero:", error);
+            }
+        }
+
+        function cerrarModalHorarios() {
+            const modal = document.getElementById('modal-horarios');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            barberoSeleccionadoId = null;
+        }
+
+        document.getElementById('form-horarios').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!barberoSeleccionadoId) return;
+
+            const horarios = DIAS_SEMANA.map(({ dia }) => {
+                const esDescanso = document.getElementById(`descanso-${dia}`).checked;
+                const horaInicio = document.getElementById(`inicio-${dia}`).value || '11:00';
+                const horaFin = document.getElementById(`fin-${dia}`).value || '21:00';
+
+                return {
+                    dia_semana: dia,
+                    hora_inicio: horaInicio,
+                    hora_fin: horaFin,
+                    es_descanso: esDescanso
+                };
+            });
+
+            try {
+                const response = await fetch('/api/horarios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        barbero_id: barberoSeleccionadoId,
+                        horarios
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('¡Horarios guardados correctamente!');
+                    cerrarModalHorarios();
+                } else {
+                    alert('Error al guardar horarios: ' + (data.message || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error al guardar horarios:', error);
+                alert('Error de conexión al guardar horarios.');
+            }
+        });
+
         cargarBarberos();
     </script>
 </body>

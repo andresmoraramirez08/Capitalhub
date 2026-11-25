@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - CapitalHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+
+    <!-- Menú Lateral -->
+    <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
+        <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
+            <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
+            <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
+            <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
+            <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white transition">Clientes</a>
+            <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
+            <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+        </nav>
+        <div class="p-4 border-t border-zinc-800">
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex flex-wrap justify-between items-center gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">Directorio de Clientes</h1>
+                <p class="text-zinc-400 mt-1">Clientes registrados en el sistema (rol 3) e historial de citas.</p>
+            </div>
+            <a href="dashboard.html" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition border border-zinc-700 text-sm font-medium">
+                ← Volver al Dashboard
+            </a>
+        </header>
+
+        <!-- Alta Rápida de Cliente (rol 3) -->
+        <section class="bg-[#111111] p-5 rounded-xl border border-zinc-800 max-w-4xl mb-6">
+            <h2 class="text-base font-bold text-white mb-3">Alta Rápida de Cliente</h2>
+            <form id="form-cliente-rapido" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Nombre *</label>
+                    <input type="text" id="cli-nombre" required placeholder="Ej. Luis" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Apellidos</label>
+                    <input type="text" id="cli-apellidos" placeholder="Ej. Pérez" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Teléfono (WhatsApp) *</label>
+                    <input type="text" id="cli-telefono" required placeholder="8711234567" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <button type="submit" class="bg-zinc-100 text-black font-semibold py-2 px-4 rounded-lg hover:bg-white transition text-sm">
+                    Guardar Cliente
+                </button>
+            </form>
+        </section>
+
+        <!-- Buscador -->
+        <div class="mb-6 max-w-md">
+            <input
+                type="text"
+                id="input-buscar"
+                placeholder="Buscar por nombre, correo o teléfono..."
+                class="w-full bg-[#111111] border border-zinc-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-zinc-500"
+            >
+        </div>
+
+        <!-- Tabla de Clientes -->
+        <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-6xl">
+            <table class="w-full text-left text-sm text-zinc-300">
+                <thead class="bg-zinc-800/60 text-white border-b border-zinc-800">
+                    <tr>
+                        <th class="px-4 py-3 font-semibold">Cliente</th>
+                        <th class="px-4 py-3 font-semibold">Teléfono</th>
+                        <th class="px-4 py-3 font-semibold">Correo</th>
+                        <th class="px-4 py-3 font-semibold">Citas (Completadas)</th>
+                        <th class="px-4 py-3 font-semibold">Última Visita</th>
+                        <th class="px-4 py-3 font-semibold">Total Gastado</th>
+                        <th class="px-4 py-3 font-semibold text-right">Historial</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-clientes" class="divide-y divide-zinc-800">
+                    <tr>
+                        <td colspan="7" class="px-4 py-6 text-center text-zinc-400">Cargando clientes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal de Historial -->
+    <div id="modal-historial" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-2xl p-6 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-4 mb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white" id="modal-cliente-titulo">Historial de Citas</h3>
+                    <p class="text-sm text-zinc-400" id="modal-cliente-subtitulo"></p>
+                </div>
+                <button onclick="cerrarModalHistorial()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+
+            <div id="contenedor-historial" class="space-y-3">
+                <p class="text-zinc-400 text-sm">Cargando historial...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        const rolUsuario = localStorage.getItem('rol');
+        if (rolUsuario !== '1') {
+            window.location.href = 'dashboard.html';
+        }
+
+        function formatearFecha(fechaIso) {
+            if (!fechaIso) return '—';
+            const soloFecha = String(fechaIso).slice(0, 10);
+            const [y, m, d] = soloFecha.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        document.getElementById('form-cliente-rapido').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('cli-nombre').value;
+            const apellidos = document.getElementById('cli-apellidos').value;
+            const telefono = document.getElementById('cli-telefono').value;
+
+            try {
+                const res = await fetch('/api/clientes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nombre, apellidos, telefono })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || 'Cliente guardado');
+                    document.getElementById('form-cliente-rapido').reset();
+                    await cargarClientes();
+                } else {
+                    alert(data.message || 'No se pudo guardar el cliente');
+                }
+            } catch (error) {
+                console.error('Error al guardar cliente:', error);
+                alert('Error de conexión.');
+            }
+        });
+
+        async function cargarClientes() {
+            const buscar = document.getElementById('input-buscar').value.trim();
+            const tbody = document.getElementById('tabla-clientes');
+
+            try {
+                const url = buscar
+                    ? `/api/clientes?buscar=${encodeURIComponent(buscar)}`
+                    : '/api/clientes';
+
+                const res = await fetch(url, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error al cargar clientes.</td></tr>';
+                    return;
+                }
+
+                const clientes = await res.json();
+                if (clientes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-zinc-400">No hay clientes registrados con el rol 3.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                clientes.forEach(cli => {
+                    const nombreCompleto = `${cli.nombre || ''} ${cli.apellidos || ''}`.trim() || 'Sin nombre';
+                    const nombreEscapado = nombreCompleto.replace(/'/g, "\\'");
+                    const estadoBadge = cli.activo === false
+                        ? '<span class="ml-2 text-xs px-2 py-0.5 rounded bg-red-950 text-red-400">Inactivo</span>'
+                        : '';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-zinc-800/30 transition">
+                            <td class="px-4 py-3 font-medium text-white">${nombreCompleto}${estadoBadge}</td>
+                            <td class="px-4 py-3">${cli.telefono || '—'}</td>
+                            <td class="px-4 py-3 text-zinc-400">${cli.email || '—'}</td>
+                            <td class="px-4 py-3">${cli.total_citas} (${cli.citas_completadas})</td>
+                            <td class="px-4 py-3">${formatearFecha(cli.ultima_visita)}</td>
+                            <td class="px-4 py-3 text-emerald-400 font-semibold">$${Number(cli.total_gastado || 0).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button onclick="verHistorial('${cli.id}', '${nombreEscapado}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition">
+                                    Ver historial
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error al cargar clientes:', error);
+                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error de conexión.</td></tr>';
+            }
+        }
+
+        async function verHistorial(idCliente, nombre) {
+            const modal = document.getElementById('modal-historial');
+            const contenedor = document.getElementById('contenedor-historial');
+
+            document.getElementById('modal-cliente-titulo').textContent = nombre;
+            document.getElementById('modal-cliente-subtitulo').textContent = 'Cargando datos...';
+            contenedor.innerHTML = '<p class="text-zinc-400 text-sm">Cargando historial...</p>';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            try {
+                const res = await fetch(`/api/clientes/${encodeURIComponent(idCliente)}/historial`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!res.ok) {
+                    contenedor.innerHTML = '<p class="text-red-400 text-sm">No se pudo cargar el historial.</p>';
+                    return;
+                }
+
+                const data = await res.json();
+                const cli = data.cliente || {};
+                const citas = data.citas || [];
+
+                document.getElementById('modal-cliente-subtitulo').textContent =
+                    `Tel: ${cli.telefono || '—'} · Correo: ${cli.email || '—'}`;
+
+                if (citas.length === 0) {
+                    contenedor.innerHTML = '<p class="text-zinc-400 text-sm">Este cliente aún no tiene citas registradas.</p>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                citas.forEach(c => {
+                    const colorEstado = c.estado === 'COMPLETADA'
+                        ? 'text-emerald-400 border-emerald-500/40'
+                        : (c.estado === 'CANCELADA' ? 'text-red-400 border-red-500/40' : 'text-amber-300 border-zinc-700');
+
+                    contenedor.innerHTML += `
+                        <div class="bg-[#0a0a0a] border ${colorEstado} rounded-lg p-3 flex justify-between items-center text-sm">
+                            <div>
+                                <p class="font-semibold text-white">${c.servicio || 'Servicio'} — $${Number(c.precio || 0).toFixed(2)}</p>
+                                <p class="text-zinc-400 text-xs">${formatearFecha(c.fecha_cita)} · ${String(c.hora_inicio || '').slice(0, 5)} · Barbero: ${c.nombre_barbero || '—'}</p>
+                            </div>
+                            <span class="text-xs font-semibold ${colorEstado.split(' ')[0]}">${c.estado}</span>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error al cargar historial:', error);
+                contenedor.innerHTML = '<p class="text-red-400 text-sm">Error de conexión.</p>';
+            }
+        }
+
+        function cerrarModalHistorial() {
+            const modal = document.getElementById('modal-historial');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('input-buscar').addEventListener('input', cargarClientes);
+        cargarClientes();
+    </script>
+</body>
+</html>
