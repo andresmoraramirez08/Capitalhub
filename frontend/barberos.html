@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>CapitalHub - Gestión de Barberos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js"></script>
+    <script src="menu-movil.js"></script>
 </head>
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
+    <!-- Contenedor de Notificaciones (Toasts) -->
     
-    <!-- Menú Lateral -->
+    <!-- ==========================================
+         PLANTILLA MAESTRA: MENÚ LATERAL
+         ========================================== -->
     <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
         <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
             <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
@@ -20,6 +26,7 @@
             <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
             <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Barberos</a>
             <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+            <a href="comisiones.html" id="menu-comisiones" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Comisiones</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
             <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
@@ -27,6 +34,7 @@
             </button>
         </div>
     </aside>
+    <!-- ========================================== -->
 
     <!-- Contenido Principal -->
     <main class="flex-1 p-8 overflow-y-auto">
@@ -68,6 +76,7 @@
                             <th class="px-4 py-3 font-semibold">Teléfono</th>
                             <th class="px-4 py-3 font-semibold">Especialidad</th>
                             <th class="px-4 py-3 font-semibold">Estado</th>
+                            <th class="px-4 py-3 font-semibold">Acceso al sistema</th>
                             <th class="px-4 py-3 font-semibold text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -78,6 +87,50 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal Acceso al sistema (cuenta del barbero) -->
+    <div id="modal-cuenta" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Acceso al sistema</h3>
+                    <p id="cuenta-barbero-nombre" class="text-sm text-zinc-400"></p>
+                </div>
+                <button onclick="cerrarModalCuenta()" class="text-zinc-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+
+            <!-- Sin cuenta: crear acceso -->
+            <form id="form-crear-cuenta" class="space-y-4">
+                <p class="text-sm text-zinc-400">Crea el usuario con el que este barbero entrará a ver su agenda y sus comisiones.</p>
+                <div>
+                    <label class="block text-zinc-400 text-sm mb-1">Correo para iniciar sesión</label>
+                    <input type="email" id="cuenta-email" required class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-sm mb-1">Contraseña (mínimo 8 caracteres)</label>
+                    <input type="password" id="cuenta-password" minlength="8" required autocomplete="new-password" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="cerrarModalCuenta()" class="px-4 py-2 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-zinc-100 text-black font-semibold hover:bg-white">Crear acceso</button>
+                </div>
+            </form>
+
+            <!-- Con cuenta: cambiar contraseña o quitar acceso -->
+            <div id="panel-cuenta-existente" class="hidden space-y-4">
+                <p class="text-sm text-zinc-300">Inicia sesión con: <span id="cuenta-email-actual" class="font-semibold text-white"></span></p>
+                <form id="form-cambiar-password" class="space-y-3">
+                    <label class="block text-zinc-400 text-sm">Nueva contraseña (mínimo 8 caracteres)</label>
+                    <input type="password" id="cuenta-nueva-password" minlength="8" required autocomplete="new-password" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded p-2 text-white">
+                    <button type="submit" class="w-full px-4 py-2 rounded-lg bg-zinc-100 text-black font-semibold hover:bg-white">Cambiar contraseña</button>
+                </form>
+                <div class="border-t border-zinc-800 pt-4">
+                    <button type="button" id="btn-quitar-acceso" onclick="quitarAcceso(this)" class="w-full px-4 py-2 rounded-lg border border-red-700 text-red-300 hover:bg-red-900/40">Quitar acceso</button>
+                    <p class="text-xs text-zinc-500 mt-2">El barbero ya no podrá iniciar sesión. Sus citas y comisiones no se borran.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Editar Barbero -->
     <div id="modal-editar-barbero" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
@@ -136,14 +189,13 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         PLANTILLA MAESTRA: SEGURIDAD FRONTEND
+         ========================================== -->
     <script>
+        // Utilidades comunes (toast, spinner, sesión, escaparHTML) vienen de app.js
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'login.html';
-
-        const rolUsuario = localStorage.getItem('rol');
-        if (rolUsuario !== '1') {
-            window.location.href = 'dashboard.html';
-        }
+        const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
 
         const DIAS_SEMANA = [
             { dia: 1, nombre: 'Lunes' },
@@ -160,79 +212,69 @@
 
         document.getElementById('form-barbero').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const nombre = document.getElementById('nombre').value;
-            const telefono = document.getElementById('telefono').value;
-            const especialidad = document.getElementById('especialidad').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            const cuerpo = {
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                especialidad: document.getElementById('especialidad').value
+            };
 
+            toggleCargando(btn, true);
             try {
-                const response = await fetch('/api/barberos/registrar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ nombre, telefono, especialidad })
-                });
-
-                const data = await response.json();
-
+                const response = await fetch('/api/barberos/registrar', { method: 'POST', headers: authHeaders(), body: JSON.stringify(cuerpo) });
                 if (response.ok) {
-                    alert('¡Barbero registrado con éxito!');
-                    document.getElementById('form-barbero').reset(); 
+                    mostrarToast('¡Barbero registrado con éxito!', 'exito');
+                    document.getElementById('form-barbero').reset();
                     cargarBarberos();
                 } else {
-                    alert('Error: ' + data.message);
+                    mostrarToast(await leerError(response, 'No se pudo registrar el barbero'), 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error de conexión.');
+                mostrarToast('Error de conexión.', 'error');
             }
+            toggleCargando(btn, false);
         });
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
-
         async function cargarBarberos() {
+            const tbody = document.getElementById('lista-barberos');
             try {
-                const response = await fetch('/api/barberos', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                
-                if (response.ok) {
-                    barberosCache = await response.json();
-                    const tbody = document.getElementById('lista-barberos');
-                    tbody.innerHTML = ''; 
+                const response = await fetch('/api/barberos', { headers: authHeaders() });
+                if (!response.ok) throw new Error(await leerError(response, 'No se pudieron cargar los barberos'));
+                barberosCache = await response.json();
 
-                    barberosCache.forEach(barbero => {
-                        const estaActivo = barbero.activo !== false;
-                        const nombreEscapado = barbero.nombre.replace(/'/g, "\\'");
-                        const badgeEstado = estaActivo
-                            ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/40">Activo</span>'
-                            : '<span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Inactivo</span>';
-
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-zinc-800/30 transition">
-                                <td class="px-4 py-3 text-white font-medium">${barbero.nombre}</td>
-                                <td class="px-4 py-3">${barbero.telefono}</td>
-                                <td class="px-4 py-3">${barbero.especialidad}</td>
-                                <td class="px-4 py-3">${badgeEstado}</td>
-                                <td class="px-4 py-3 text-right space-x-3">
-                                    <button onclick="abrirModalEditarBarbero('${barbero.id}')" class="text-amber-400 hover:text-amber-300 transition text-sm font-medium">Editar</button>
-                                    <button onclick="abrirModalHorarios('${barbero.id}', '${nombreEscapado}')" class="text-blue-400 hover:text-blue-300 transition text-sm font-medium">Horarios</button>
-                                    <button onclick="toggleActivoBarbero('${barbero.id}', ${!estaActivo})" class="text-zinc-300 hover:text-white transition text-sm">
-                                        ${estaActivo ? 'Desactivar' : 'Activar'}
-                                    </button>
-                                    <button onclick="borrarBarbero('${barbero.id}')" class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
+                if (barberosCache.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-zinc-500">Aún no hay barberos registrados.</td></tr>';
+                    return;
                 }
+
+                tbody.innerHTML = barberosCache.map(barbero => {
+                    const estaActivo = barbero.activo !== false;
+                    const badgeEstado = estaActivo
+                        ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/40">Activo</span>'
+                        : '<span class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Inactivo</span>';
+                    return `
+                        <tr class="hover:bg-zinc-800/30 transition ${estaActivo ? '' : 'opacity-60'}">
+                            <td class="px-4 py-3 text-white font-medium">${escaparHTML(barbero.nombre)}</td>
+                            <td class="px-4 py-3">${escaparHTML(barbero.telefono || '—')}</td>
+                            <td class="px-4 py-3">${escaparHTML(barbero.especialidad || '—')}</td>
+                            <td class="px-4 py-3">${badgeEstado}</td>
+                            <td class="px-4 py-3">${barbero.cuenta_email
+                                ? `<button onclick="abrirModalCuenta('${barbero.id}')" class="text-left text-xs text-emerald-400 hover:underline">✓ ${escaparHTML(barbero.cuenta_email)}</button>`
+                                : `<button onclick="abrirModalCuenta('${barbero.id}')" class="text-xs px-2 py-1 rounded border border-amber-600/60 text-amber-300 hover:bg-amber-900/30">Crear acceso</button>`}</td>
+                            <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                                <button onclick="abrirModalEditarBarbero('${barbero.id}')" class="text-amber-400 hover:text-amber-300 transition text-sm font-medium">Editar</button>
+                                <button onclick="abrirModalHorarios('${barbero.id}')" class="text-blue-400 hover:text-blue-300 transition text-sm font-medium">Horarios</button>
+                                <button onclick="toggleActivoBarbero('${barbero.id}', ${!estaActivo}, this)" class="text-zinc-300 hover:text-white transition text-sm">
+                                    ${estaActivo ? 'Desactivar' : 'Activar'}
+                                </button>
+                                <button onclick="borrarBarbero('${barbero.id}', this)" class="text-red-400 hover:text-red-300 transition text-sm">Eliminar</button>
+                            </td>
+                        </tr>`;
+                }).join('');
             } catch (error) {
-                console.error('Error de conexión al cargar la tabla:', error);
+                console.error('Error al cargar barberos:', error);
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-red-400">${escaparHTML(error.message)}</td></tr>`;
             }
         }
 
@@ -258,86 +300,78 @@
 
         document.getElementById('form-editar-barbero').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
             const id = document.getElementById('edit-barb-id').value;
-            const nombre = document.getElementById('edit-barb-nombre').value;
-            const telefono = document.getElementById('edit-barb-telefono').value;
-            const especialidad = document.getElementById('edit-barb-especialidad').value;
+            const cuerpo = {
+                nombre: document.getElementById('edit-barb-nombre').value,
+                telefono: document.getElementById('edit-barb-telefono').value,
+                especialidad: document.getElementById('edit-barb-especialidad').value
+            };
 
+            toggleCargando(btn, true);
             try {
-                const response = await fetch(`/api/barberos/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ nombre, telefono, especialidad })
-                });
-
-                const data = await response.json();
+                const response = await fetch(`/api/barberos/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(cuerpo) });
                 if (response.ok) {
+                    mostrarToast('Barbero actualizado', 'exito');
                     cerrarModalEditarBarbero();
                     cargarBarberos();
                 } else {
-                    alert('Error: ' + (data.message || 'No se pudo actualizar'));
+                    mostrarToast(await leerError(response, 'No se pudo actualizar'), 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error de conexión.');
+                mostrarToast('Error de conexión.', 'error');
             }
+            toggleCargando(btn, false);
         });
 
-        async function toggleActivoBarbero(id, nuevoEstado) {
+        async function toggleActivoBarbero(id, nuevoEstado, btn) {
+            if (!nuevoEstado && !(await confirmar('¿Desactivar a este barbero?', { detalle: 'Ya no aparecerá para agendar citas. Puedes volver a activarlo cuando quieras.', textoConfirmar: 'Sí, desactivar', peligro: true }))) return;
+            toggleCargando(btn, true);
             try {
-                const response = await fetch(`/api/barberos/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ activo: nuevoEstado })
-                });
+                const response = await fetch(`/api/barberos/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ activo: nuevoEstado }) });
                 if (response.ok) {
+                    mostrarToast(nuevoEstado ? 'Barbero activado' : 'Barbero desactivado', 'exito');
                     cargarBarberos();
-                } else {
-                    alert('No se pudo cambiar el estado del barbero.');
+                    return;
                 }
+                mostrarToast(await leerError(response, 'No se pudo cambiar el estado del barbero.'), 'error');
             } catch (error) {
                 console.error('Error:', error);
+                mostrarToast('Error de conexión.', 'error');
             }
+            toggleCargando(btn, false);
         }
 
-        async function borrarBarbero(idBarbero) {
-            const confirmar = confirm("¿Estás seguro de que deseas dar de baja a este barbero?");
-            if (!confirmar) return;
-
+        async function borrarBarbero(idBarbero, btn) {
+            if (!(await confirmar('¿Eliminar a este barbero?', { detalle: 'Esta acción no se puede deshacer.', textoConfirmar: 'Sí, eliminar', peligro: true }))) return;
+            toggleCargando(btn, true);
             try {
-                const response = await fetch(`/api/barberos/${idBarbero}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
+                const response = await fetch(`/api/barberos/${idBarbero}`, { method: 'DELETE', headers: authHeaders() });
                 if (response.ok) {
-                    alert("Barbero eliminado exitosamente");
+                    mostrarToast('Barbero eliminado', 'exito');
                     cargarBarberos();
-                } else {
-                    alert("Hubo un problema al intentar eliminar.");
+                    return;
                 }
+                // Si tiene citas, el backend explica que conviene desactivarlo
+                mostrarToast(await leerError(response, 'Hubo un problema al intentar eliminar.'), 'error');
             } catch (error) {
-                console.error("Error:", error);
+                console.error('Error:', error);
+                mostrarToast('Error de conexión.', 'error');
             }
+            toggleCargando(btn, false);
         }
 
+        // ---------------------------------------------------------------
+        // Horarios
+        // ---------------------------------------------------------------
         function renderizarFilasHorario(horariosGuardados = []) {
-            const contenedor = document.getElementById('contenedor-dias-horario');
-            contenedor.innerHTML = '';
-
-            DIAS_SEMANA.forEach(({ dia, nombre }) => {
+            document.getElementById('contenedor-dias-horario').innerHTML = DIAS_SEMANA.map(({ dia, nombre }) => {
                 const existente = horariosGuardados.find(h => Number(h.dia_semana) === dia);
                 const esDescanso = existente ? Boolean(existente.es_descanso) : false;
                 const horaInicio = existente && existente.hora_inicio ? existente.hora_inicio.slice(0, 5) : '11:00';
                 const horaFin = existente && existente.hora_fin ? existente.hora_fin.slice(0, 5) : '21:00';
-
-                contenedor.innerHTML += `
+                return `
                     <div class="grid grid-cols-12 gap-2 items-center bg-[#0a0a0a] border border-zinc-800 p-2.5 rounded-lg text-sm">
                         <div class="col-span-3 font-medium text-white">${nombre}</div>
                         <div class="col-span-3">
@@ -355,23 +389,20 @@
                                 class="rounded bg-[#111111] border-zinc-700">
                             <label for="descanso-${dia}" class="text-zinc-300 text-xs cursor-pointer">Descanso</label>
                         </div>
-                    </div>
-                `;
-            });
+                    </div>`;
+            }).join('');
         }
 
         function toggleDescanso(dia) {
             const checked = document.getElementById(`descanso-${dia}`).checked;
-            const inputInicio = document.getElementById(`inicio-${dia}`);
-            const inputFin = document.getElementById(`fin-${dia}`);
-
-            inputInicio.disabled = checked;
-            inputFin.disabled = checked;
+            document.getElementById(`inicio-${dia}`).disabled = checked;
+            document.getElementById(`fin-${dia}`).disabled = checked;
         }
 
-        async function abrirModalHorarios(idBarbero, nombreBarbero) {
+        async function abrirModalHorarios(idBarbero) {
+            const barbero = barberosCache.find(b => String(b.id) === String(idBarbero));
             barberoSeleccionadoId = idBarbero;
-            document.getElementById('modal-barbero-nombre').textContent = `Barbero: ${nombreBarbero}`;
+            document.getElementById('modal-barbero-nombre').textContent = `Barbero: ${barbero ? barbero.nombre : ''}`;
             renderizarFilasHorario([]);
 
             const modal = document.getElementById('modal-horarios');
@@ -379,15 +410,12 @@
             modal.classList.add('flex');
 
             try {
-                const response = await fetch(`/api/horarios/${idBarbero}`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    renderizarFilasHorario(data);
-                }
+                const response = await fetch(`/api/horarios/${idBarbero}`, { headers: authHeaders() });
+                if (!response.ok) throw new Error(await leerError(response, 'No se pudieron cargar los horarios'));
+                renderizarFilasHorario(await response.json());
             } catch (error) {
-                console.error("Error al cargar horarios del barbero:", error);
+                console.error('Error al cargar horarios del barbero:', error);
+                mostrarToast(error.message, 'error');
             }
         }
 
@@ -401,46 +429,132 @@
         document.getElementById('form-horarios').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!barberoSeleccionadoId) return;
+            const btn = e.target.querySelector('button[type="submit"]');
 
-            const horarios = DIAS_SEMANA.map(({ dia }) => {
-                const esDescanso = document.getElementById(`descanso-${dia}`).checked;
-                const horaInicio = document.getElementById(`inicio-${dia}`).value || '11:00';
-                const horaFin = document.getElementById(`fin-${dia}`).value || '21:00';
+            const horarios = DIAS_SEMANA.map(({ dia }) => ({
+                dia_semana: dia,
+                hora_inicio: document.getElementById(`inicio-${dia}`).value || '11:00',
+                hora_fin: document.getElementById(`fin-${dia}`).value || '21:00',
+                es_descanso: document.getElementById(`descanso-${dia}`).checked
+            }));
 
-                return {
-                    dia_semana: dia,
-                    hora_inicio: horaInicio,
-                    hora_fin: horaFin,
-                    es_descanso: esDescanso
-                };
-            });
+            // Validación en pantalla antes de enviar (el backend vuelve a validar)
+            for (const h of horarios) {
+                if (h.es_descanso) continue;
+                const nombreDia = DIAS_SEMANA.find(d => d.dia === h.dia_semana).nombre;
+                if (h.hora_fin <= h.hora_inicio) {
+                    mostrarToast(`${nombreDia}: la salida debe ser después de la entrada.`, 'error');
+                    return;
+                }
+                if (h.hora_inicio < '11:00' || h.hora_fin > '21:00') {
+                    mostrarToast(`${nombreDia}: el turno debe estar entre 11:00 y 21:00.`, 'error');
+                    return;
+                }
+            }
 
+            toggleCargando(btn, true);
             try {
                 const response = await fetch('/api/horarios', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        barbero_id: barberoSeleccionadoId,
-                        horarios
-                    })
+                    headers: authHeaders(),
+                    body: JSON.stringify({ barbero_id: barberoSeleccionadoId, horarios })
                 });
-
-                const data = await response.json();
-
                 if (response.ok) {
-                    alert('¡Horarios guardados correctamente!');
+                    mostrarToast('¡Horarios guardados correctamente!', 'exito');
                     cerrarModalHorarios();
                 } else {
-                    alert('Error al guardar horarios: ' + (data.message || 'Error desconocido'));
+                    mostrarToast(await leerError(response, 'Error al guardar horarios'), 'error');
                 }
             } catch (error) {
                 console.error('Error al guardar horarios:', error);
-                alert('Error de conexión al guardar horarios.');
+                mostrarToast('Error de conexión al guardar horarios.', 'error');
             }
+            toggleCargando(btn, false);
         });
+
+        // ---------------------------------------------------------------
+        // Acceso al sistema (cuenta del barbero)
+        // ---------------------------------------------------------------
+        let barberoCuentaId = null;
+
+        function abrirModalCuenta(id) {
+            const b = barberosCache.find(item => String(item.id) === String(id));
+            if (!b) return;
+            barberoCuentaId = b.id;
+            document.getElementById('cuenta-barbero-nombre').textContent = b.nombre;
+            document.getElementById('form-crear-cuenta').reset();
+            document.getElementById('form-cambiar-password').reset();
+
+            const tieneCuenta = Boolean(b.cuenta_email);
+            document.getElementById('form-crear-cuenta').classList.toggle('hidden', tieneCuenta);
+            document.getElementById('panel-cuenta-existente').classList.toggle('hidden', !tieneCuenta);
+            document.getElementById('cuenta-email-actual').textContent = b.cuenta_email || '';
+
+            const modal = document.getElementById('modal-cuenta');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalCuenta() {
+            const modal = document.getElementById('modal-cuenta');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            barberoCuentaId = null;
+        }
+
+        document.getElementById('form-crear-cuenta').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            toggleCargando(btn, true);
+            try {
+                const res = await fetch(`/api/barberos/${barberoCuentaId}/cuenta`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({
+                        email: document.getElementById('cuenta-email').value,
+                        password: document.getElementById('cuenta-password').value
+                    })
+                });
+                if (res.ok) {
+                    mostrarToast((await res.json()).message, 'exito');
+                    cerrarModalCuenta();
+                    cargarBarberos();
+                } else {
+                    mostrarToast(await leerError(res, 'No se pudo crear el acceso'), 'error');
+                }
+            } catch (error) { mostrarToast('Error de conexión.', 'error'); }
+            toggleCargando(btn, false);
+        });
+
+        document.getElementById('form-cambiar-password').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            toggleCargando(btn, true);
+            try {
+                const res = await fetch(`/api/barberos/${barberoCuentaId}/cuenta`, {
+                    method: 'PUT', headers: authHeaders(),
+                    body: JSON.stringify({ password: document.getElementById('cuenta-nueva-password').value })
+                });
+                if (res.ok) { mostrarToast('Contraseña actualizada', 'exito'); cerrarModalCuenta(); }
+                else mostrarToast(await leerError(res, 'No se pudo cambiar la contraseña'), 'error');
+            } catch (error) { mostrarToast('Error de conexión.', 'error'); }
+            toggleCargando(btn, false);
+        });
+
+        async function quitarAcceso(btn) {
+            if (!(await confirmar('¿Quitar el acceso a este barbero?', { detalle: 'Ya no podrá iniciar sesión. Sus citas y comisiones no se borran.', textoConfirmar: 'Sí, quitar acceso', peligro: true }))) return;
+            toggleCargando(btn, true);
+            try {
+                const res = await fetch(`/api/barberos/${barberoCuentaId}/cuenta`, { method: 'DELETE', headers: authHeaders() });
+                if (res.ok) {
+                    mostrarToast((await res.json()).message, 'exito');
+                    cerrarModalCuenta();
+                    cargarBarberos();
+                } else {
+                    mostrarToast(await leerError(res, 'No se pudo quitar el acceso'), 'error');
+                }
+            } catch (error) { mostrarToast('Error de conexión.', 'error'); }
+            toggleCargando(btn, false);
+        }
 
         cargarBarberos();
     </script>

@@ -1,14 +1,7 @@
-const { Pool } = require('pg');
 const crypto = require('crypto');
 require('dotenv').config();
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+const pool = require('../config/db');
 
 const PORCENTAJE_COMISION_DEFAULT = 65;
 
@@ -65,7 +58,7 @@ const generarComisionPorCita = async (client, citaId, porcentaje = PORCENTAJE_CO
 };
 
 /**
- * Calcula y registra comisiones (35%) para todas las citas COMPLETADA
+ * Calcula y registra comisiones (65% por defecto) para todas las citas COMPLETADA
  * que aún no tengan comisión registrada.
  */
 const calcularDesdeCitasCompletadas = async (req, res) => {
@@ -117,7 +110,16 @@ const calcularDesdeCitasCompletadas = async (req, res) => {
 const listarComisiones = async (req, res) => {
     try {
         const estado = (req.query.estado || '').trim().toUpperCase();
-        const barberoId = (req.query.barbero_id || '').trim();
+        const esAdmin = Number(req.user && (req.user.rol_id || req.user.rol)) === 1;
+        // El barbero solo puede consultar sus propias comisiones
+        const barberoId = esAdmin ? (req.query.barbero_id || '').trim() : (req.user.barbero_id || '');
+        if (!esAdmin && !barberoId) {
+            return res.status(403).json({ message: 'Tu usuario no está enlazado a un barbero.' });
+        }
+        // Periodo opcional (RF-ADM-02: comisiones del periodo), por fecha de la cita
+        const fechaValida = (f) => /^\d{4}-\d{2}-\d{2}$/.test(String(f || ''));
+        const desde = fechaValida(req.query.desde) ? req.query.desde : null;
+        const hasta = fechaValida(req.query.hasta) ? req.query.hasta : null;
 
         let query = `
             SELECT
@@ -126,7 +128,7 @@ const listarComisiones = async (req, res) => {
                 cm.barbero_id,
                 b.nombre AS nombre_barbero,
                 s.nombre AS nombre_servicio,
-                c.fecha_cita,
+                to_char(c.fecha_cita, 'YYYY-MM-DD') AS fecha_cita,
                 cm.monto_servicio,
                 cm.porcentaje_aplicado,
                 cm.monto_comision,
@@ -150,6 +152,15 @@ const listarComisiones = async (req, res) => {
         if (barberoId) {
             query += ` AND cm.barbero_id = $${idx++}`;
             params.push(barberoId);
+        }
+
+        if (desde) {
+            query += ` AND c.fecha_cita >= $${idx++}`;
+            params.push(desde);
+        }
+        if (hasta) {
+            query += ` AND c.fecha_cita <= $${idx++}`;
+            params.push(hasta);
         }
 
         query += ` ORDER BY cm.fecha_calculo DESC NULLS LAST, cm.id DESC`;
@@ -195,13 +206,22 @@ const liquidarPendientesBarbero = async (req, res) => {
             return res.status(400).json({ message: 'Falta barbero_id' });
         }
 
+        // Si se manda un periodo, solo se liquidan las comisiones de citas dentro de ese periodo
+        const fechaValida = (f) => /^\d{4}-\d{2}-\d{2}$/.test(String(f || ''));
+        const desde = fechaValida(req.body.desde) ? req.body.desde : null;
+        const hasta = fechaValida(req.body.hasta) ? req.body.hasta : null;
+
         const result = await pool.query(
-            `UPDATE comisiones
+            `UPDATE comisiones cm
              SET estado = 'PAGADO',
                  fecha_liquidacion = NOW()
-             WHERE barbero_id = $1 AND estado = 'PENDIENTE'
-             RETURNING *`,
-            [barbero_id]
+             FROM citas c
+             WHERE c.id = cm.cita_id
+               AND cm.barbero_id = $1 AND cm.estado = 'PENDIENTE'
+               AND ($2::date IS NULL OR c.fecha_cita >= $2::date)
+               AND ($3::date IS NULL OR c.fecha_cita <= $3::date)
+             RETURNING cm.*`,
+            [barbero_id, desde, hasta]
         );
 
         res.status(200).json({

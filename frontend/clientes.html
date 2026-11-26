@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clientes - CapitalHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js"></script>
+    <script src="menu-movil.js"></script>
 </head>
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
 
-    <!-- Menú Lateral -->
+    <!-- ==========================================
+         PLANTILLA MAESTRA: MENÚ LATERAL
+         ========================================== -->
     <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
         <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
             <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
@@ -18,9 +22,11 @@
             <a href="dashboard.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Dashboard</a>
             <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
             <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
-            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white transition">Clientes</a>
+            <!-- Aquí "Clientes" tiene el fondo gris porque es la vista activa -->
+            <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Clientes</a>
             <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
             <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+            <a href="comisiones.html" id="menu-comisiones" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Comisiones</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
             <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
@@ -28,6 +34,7 @@
             </button>
         </div>
     </aside>
+    <!-- ========================================== -->
 
     <!-- Contenido Principal -->
     <main class="flex-1 p-8 overflow-y-auto">
@@ -44,7 +51,7 @@
         <!-- Alta Rápida de Cliente (rol 3) -->
         <section class="bg-[#111111] p-5 rounded-xl border border-zinc-800 max-w-4xl mb-6">
             <h2 class="text-base font-bold text-white mb-3">Alta Rápida de Cliente</h2>
-            <form id="form-cliente-rapido" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+            <form id="form-cliente-rapido" class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Nombre *</label>
                     <input type="text" id="cli-nombre" required placeholder="Ej. Luis" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
@@ -56,6 +63,10 @@
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Teléfono (WhatsApp) *</label>
                     <input type="text" id="cli-telefono" required placeholder="8711234567" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Correo</label>
+                    <input type="email" id="cli-email" placeholder="Opcional" class="w-full bg-[#0a0a0a] border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
                 </div>
                 <button type="submit" class="bg-zinc-100 text-black font-semibold py-2 px-4 rounded-lg hover:bg-white transition text-sm">
                     Guardar Cliente
@@ -113,14 +124,14 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         PLANTILLA MAESTRA: SEGURIDAD FRONTEND
+         ========================================== -->
     <script>
+        // Utilidades comunes (toast, spinner, sesión, escaparHTML, correoVisible) vienen de app.js
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'login.html';
-
-        const rolUsuario = localStorage.getItem('rol');
-        if (rolUsuario !== '1') {
-            window.location.href = 'dashboard.html';
-        }
+        const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+        let clientesCache = [];
 
         function formatearFecha(fechaIso) {
             if (!fechaIso) return '—';
@@ -131,139 +142,121 @@
 
         document.getElementById('form-cliente-rapido').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nombre = document.getElementById('cli-nombre').value;
-            const apellidos = document.getElementById('cli-apellidos').value;
-            const telefono = document.getElementById('cli-telefono').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            const cuerpo = {
+                nombre: document.getElementById('cli-nombre').value,
+                apellidos: document.getElementById('cli-apellidos').value,
+                telefono: document.getElementById('cli-telefono').value,
+                email: document.getElementById('cli-email').value
+            };
 
+            toggleCargando(btn, true);
             try {
-                const res = await fetch('/api/clientes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ nombre, apellidos, telefono })
-                });
-                const data = await res.json();
+                const res = await fetch('/api/clientes', { method: 'POST', headers: authHeaders(), body: JSON.stringify(cuerpo) });
                 if (res.ok) {
-                    alert(data.message || 'Cliente guardado');
+                    const data = await res.json();
+                    // Si ya existía (mismo teléfono o correo) el backend lo avisa
+                    mostrarToast(data.existente ? 'Ese cliente ya estaba registrado' : 'Cliente guardado', data.existente ? 'aviso' : 'exito');
                     document.getElementById('form-cliente-rapido').reset();
                     await cargarClientes();
                 } else {
-                    alert(data.message || 'No se pudo guardar el cliente');
+                    mostrarToast(await leerError(res, 'No se pudo guardar el cliente'), 'error');
                 }
             } catch (error) {
                 console.error('Error al guardar cliente:', error);
-                alert('Error de conexión.');
+                mostrarToast('Error de conexión.', 'error');
             }
+            toggleCargando(btn, false);
         });
+
+        // Espera a que el usuario deje de escribir antes de buscar (evita una petición por tecla)
+        let temporizadorBusqueda = null;
+        function buscarConPausa() {
+            clearTimeout(temporizadorBusqueda);
+            temporizadorBusqueda = setTimeout(cargarClientes, 300);
+        }
 
         async function cargarClientes() {
             const buscar = document.getElementById('input-buscar').value.trim();
             const tbody = document.getElementById('tabla-clientes');
 
             try {
-                const url = buscar
-                    ? `/api/clientes?buscar=${encodeURIComponent(buscar)}`
-                    : '/api/clientes';
+                const url = buscar ? `/api/clientes?buscar=${encodeURIComponent(buscar)}` : '/api/clientes';
+                const res = await fetch(url, { headers: authHeaders() });
+                if (!res.ok) throw new Error(await leerError(res, 'Error al cargar clientes.'));
 
-                const res = await fetch(url, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
-                if (!res.ok) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error al cargar clientes.</td></tr>';
+                clientesCache = await res.json();
+                if (clientesCache.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-zinc-400">${buscar ? 'Ningún cliente coincide con la búsqueda.' : 'Aún no hay clientes registrados.'}</td></tr>`;
                     return;
                 }
 
-                const clientes = await res.json();
-                if (clientes.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-zinc-400">No hay clientes registrados con el rol 3.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = '';
-                clientes.forEach(cli => {
+                tbody.innerHTML = clientesCache.map(cli => {
                     const nombreCompleto = `${cli.nombre || ''} ${cli.apellidos || ''}`.trim() || 'Sin nombre';
-                    const nombreEscapado = nombreCompleto.replace(/'/g, "\\'");
                     const estadoBadge = cli.activo === false
-                        ? '<span class="ml-2 text-xs px-2 py-0.5 rounded bg-red-950 text-red-400">Inactivo</span>'
-                        : '';
-
-                    tbody.innerHTML += `
+                        ? '<span class="ml-2 text-xs px-2 py-0.5 rounded bg-red-950 text-red-400">Inactivo</span>' : '';
+                    return `
                         <tr class="hover:bg-zinc-800/30 transition">
-                            <td class="px-4 py-3 font-medium text-white">${nombreCompleto}${estadoBadge}</td>
-                            <td class="px-4 py-3">${cli.telefono || '—'}</td>
-                            <td class="px-4 py-3 text-zinc-400">${cli.email || '—'}</td>
-                            <td class="px-4 py-3">${cli.total_citas} (${cli.citas_completadas})</td>
+                            <td class="px-4 py-3 font-medium text-white">${escaparHTML(nombreCompleto)}${estadoBadge}</td>
+                            <td class="px-4 py-3">${escaparHTML(cli.telefono || '—')}</td>
+                            <td class="px-4 py-3 text-zinc-400">${escaparHTML(correoVisible(cli.email) || '—')}</td>
+                            <td class="px-4 py-3">${Number(cli.total_citas)} (${Number(cli.citas_completadas)})</td>
                             <td class="px-4 py-3">${formatearFecha(cli.ultima_visita)}</td>
                             <td class="px-4 py-3 text-emerald-400 font-semibold">$${Number(cli.total_gastado || 0).toFixed(2)}</td>
                             <td class="px-4 py-3 text-right">
-                                <button onclick="verHistorial('${cli.id}', '${nombreEscapado}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition">
-                                    Ver historial
-                                </button>
+                                <button onclick="verHistorial('${cli.id}')" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition">Ver historial</button>
                             </td>
-                        </tr>
-                    `;
-                });
+                        </tr>`;
+                }).join('');
             } catch (error) {
                 console.error('Error al cargar clientes:', error);
-                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error de conexión.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">${escaparHTML(error.message)}</td></tr>`;
             }
         }
 
-        async function verHistorial(idCliente, nombre) {
+        async function verHistorial(idCliente) {
             const modal = document.getElementById('modal-historial');
             const contenedor = document.getElementById('contenedor-historial');
+            const cliCache = clientesCache.find(c => String(c.id) === String(idCliente));
 
-            document.getElementById('modal-cliente-titulo').textContent = nombre;
+            document.getElementById('modal-cliente-titulo').textContent =
+                cliCache ? `${cliCache.nombre || ''} ${cliCache.apellidos || ''}`.trim() : 'Cliente';
             document.getElementById('modal-cliente-subtitulo').textContent = 'Cargando datos...';
             contenedor.innerHTML = '<p class="text-zinc-400 text-sm">Cargando historial...</p>';
-
             modal.classList.remove('hidden');
             modal.classList.add('flex');
 
             try {
-                const res = await fetch(`/api/clientes/${encodeURIComponent(idCliente)}/historial`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
-                if (!res.ok) {
-                    contenedor.innerHTML = '<p class="text-red-400 text-sm">No se pudo cargar el historial.</p>';
-                    return;
-                }
+                const res = await fetch(`/api/clientes/${encodeURIComponent(idCliente)}/historial`, { headers: authHeaders() });
+                if (!res.ok) throw new Error(await leerError(res, 'No se pudo cargar el historial.'));
 
                 const data = await res.json();
                 const cli = data.cliente || {};
                 const citas = data.citas || [];
 
                 document.getElementById('modal-cliente-subtitulo').textContent =
-                    `Tel: ${cli.telefono || '—'} · Correo: ${cli.email || '—'}`;
+                    `Tel: ${cli.telefono || '—'} · Correo: ${correoVisible(cli.email) || '—'}`;
 
                 if (citas.length === 0) {
                     contenedor.innerHTML = '<p class="text-zinc-400 text-sm">Este cliente aún no tiene citas registradas.</p>';
                     return;
                 }
 
-                contenedor.innerHTML = '';
-                citas.forEach(c => {
-                    const colorEstado = c.estado === 'COMPLETADA'
-                        ? 'text-emerald-400 border-emerald-500/40'
-                        : (c.estado === 'CANCELADA' ? 'text-red-400 border-red-500/40' : 'text-amber-300 border-zinc-700');
-
-                    contenedor.innerHTML += `
-                        <div class="bg-[#0a0a0a] border ${colorEstado} rounded-lg p-3 flex justify-between items-center text-sm">
+                const colores = { COMPLETADA: 'text-emerald-400 border-emerald-500/40', CANCELADA: 'text-red-400 border-red-500/40', NO_ASISTIO: 'text-amber-500 border-amber-500/40' };
+                contenedor.innerHTML = citas.map(c => {
+                    const color = colores[c.estado] || 'text-amber-300 border-zinc-700';
+                    return `
+                        <div class="bg-[#0a0a0a] border ${color} rounded-lg p-3 flex justify-between items-center text-sm">
                             <div>
-                                <p class="font-semibold text-white">${c.servicio || 'Servicio'} — $${Number(c.precio || 0).toFixed(2)}</p>
-                                <p class="text-zinc-400 text-xs">${formatearFecha(c.fecha_cita)} · ${String(c.hora_inicio || '').slice(0, 5)} · Barbero: ${c.nombre_barbero || '—'}</p>
+                                <p class="font-semibold text-white">${escaparHTML(c.servicio || 'Servicio')} — $${Number(c.precio || 0).toFixed(2)}</p>
+                                <p class="text-zinc-400 text-xs">${formatearFecha(c.fecha_cita)} · ${escaparHTML(String(c.hora_inicio || '').slice(0, 5))} · Barbero: ${escaparHTML(c.nombre_barbero || '—')}</p>
                             </div>
-                            <span class="text-xs font-semibold ${colorEstado.split(' ')[0]}">${c.estado}</span>
-                        </div>
-                    `;
-                });
+                            <span class="text-xs font-semibold ${color.split(' ')[0]}">${c.estado === 'NO_ASISTIO' ? 'NO ASISTIÓ' : escaparHTML(c.estado)}</span>
+                        </div>`;
+                }).join('');
             } catch (error) {
                 console.error('Error al cargar historial:', error);
-                contenedor.innerHTML = '<p class="text-red-400 text-sm">Error de conexión.</p>';
+                contenedor.innerHTML = `<p class="text-red-400 text-sm">${escaparHTML(error.message)}</p>`;
             }
         }
 
@@ -273,12 +266,7 @@
             modal.classList.remove('flex');
         }
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
-
-        document.getElementById('input-buscar').addEventListener('input', cargarClientes);
+        document.getElementById('input-buscar').addEventListener('input', buscarConPausa);
         cargarClientes();
     </script>
 </body>

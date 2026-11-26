@@ -1,20 +1,16 @@
-const { Pool } = require('pg');
 require('dotenv').config();
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+const pool = require('../config/db');
 
 const registrarServicio = async (req, res) => {
     try {
         const { nombre, precio, duracion_minutos } = req.body;
+        if (!nombre || !String(nombre).trim() || precio === undefined || precio === '' || Number(precio) < 0 || !duracion_minutos || Number(duracion_minutos) <= 0) {
+            return res.status(400).json({ message: 'Nombre, precio válido y duración mayor a 0 son obligatorios' });
+        }
         const result = await pool.query(
             'INSERT INTO servicios (nombre, precio, duracion_minutos) VALUES ($1, $2, $3) RETURNING *',
-            [nombre, precio, duracion_minutos]
+            [String(nombre).trim(), Number(precio), Number(duracion_minutos)]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -76,6 +72,10 @@ const eliminarServicio = async (req, res) => {
 
         res.json({ message: "Servicio eliminado correctamente" });
     } catch (error) {
+        // 23503 = el registro tiene citas/comisiones ligadas (llave foránea)
+        if (error.code === '23503') {
+            return res.status(409).json({ message: 'No se puede eliminar: este servicio ya tiene citas registradas. Edítalo en lugar de eliminarlo para conservar el historial.' });
+        }
         console.error("Error al eliminar servicio:", error);
         res.status(500).json({ message: "Error interno del servidor" });
     }

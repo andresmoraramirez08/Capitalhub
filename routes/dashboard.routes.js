@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { obtenerResumen } = require('../controllers/dashboard.controller');
-const { verificarToken } = require('../middlewares/auth.middleware');
+const { verificarToken, verificarRol } = require('../middlewares/auth.middleware');
 
-// Ruta protegida por JWT
-router.get('/resumen', verificarToken, obtenerResumen);
+// Solo el admin ve el resumen total de ingresos de la barbería
+router.get('/resumen', verificarToken, verificarRol(['1']), obtenerResumen);
 
 module.exports = router;

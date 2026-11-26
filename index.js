@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 // Importar tus rutas
-const { Pool } = require('pg');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
@@ -29,17 +28,14 @@ app.use('/api/catalogo', require('./routes/catalogo.routes'));
 app.use('/api/comisiones', require('./routes/comisiones.routes'));
 
 // Configuración de la conexión a PostgreSQL
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+const pool = require('./config/db');
 
 // Probar la conexión a la base de datos
 pool.connect()
-  .then(() => console.log('🟢 Conectado exitosamente a PostgreSQL (CapitalHub)'))
+  .then(client => {
+    console.log('🟢 Conectado exitosamente a PostgreSQL (CapitalHub)');
+    client.release(); // devolvemos la conexión de prueba al pool
+  })
   .catch(err => console.error('🔴 Error al conectar con PostgreSQL (Esperando a que termine la instalación...)'));
 
 // Ruta de prueba inicial

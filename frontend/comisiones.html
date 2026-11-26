@@ -2,12 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CapitalHub - Comisiones</title>
+    <title>Comisiones - CapitalHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js"></script>
+    <script src="menu-movil.js"></script>
 </head>
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
 
-    <!-- Menú Lateral -->
     <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
         <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
             <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
@@ -23,336 +25,254 @@
             <a href="comisiones.html" id="menu-comisiones" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Comisiones</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
-            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
-                Cerrar Sesión
-            </button>
+            <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">Cerrar Sesión</button>
         </div>
     </aside>
 
-    <!-- Contenido Principal -->
     <main class="flex-1 p-8 overflow-y-auto">
-        <header class="flex flex-wrap justify-between items-center gap-4 mb-8">
+        <header class="flex flex-wrap justify-between items-center gap-4 mb-6">
             <div>
-                <h1 class="text-3xl font-bold">Comisiones por Cortes (65% Barbero / 35% Dueño)</h1>
-                <p class="text-zinc-400 mt-1">Cálculo automático ligado a servicios completados y barberos.</p>
+                <h1 id="titulo-pagina" class="text-3xl font-bold">Comisiones por Cortes</h1>
+                <p class="text-zinc-400 mt-1">Cálculo automático ligado a servicios completados.</p>
             </div>
-            <div class="flex flex-wrap gap-3">
-                <button onclick="sincronizarCitas()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition text-sm font-semibold">
-                    Calcular desde Citas Completadas
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportarComisiones()" class="border border-zinc-700 text-zinc-200 hover:bg-zinc-800 px-4 py-2 rounded-lg transition text-sm font-semibold">Exportar Excel</button>
+                <button onclick="imprimirReporte()" class="border border-zinc-700 text-zinc-200 hover:bg-zinc-800 px-4 py-2 rounded-lg transition text-sm font-semibold">Imprimir / PDF</button>
+                <button id="btn-calcular" onclick="sincronizarCitas(this)" class="solo-admin bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg transition text-sm font-semibold flex items-center">
+                    Calcular desde Citas
                 </button>
-                <a href="dashboard.html" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition border border-zinc-700 text-sm font-medium">
-                    ← Volver al Dashboard
-                </a>
             </div>
         </header>
+        <p class="solo-impresion text-sm mb-4">Barbería Capital · Reporte generado el <span id="fecha-impresion"></span></p>
 
-        <!-- Totales Generales de Comisiones -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mb-8">
-            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800">
-                <p class="text-xs text-zinc-400 uppercase tracking-wider">Total Servicios (Cortes)</p>
-                <p id="total-servicios" class="text-3xl font-bold text-white mt-2">$0.00</p>
+        <!-- Periodo -->
+        <div class="bg-[#111111] border border-zinc-800 rounded-xl p-4 max-w-6xl mb-6 flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-xs text-zinc-400 mb-1">Desde</label>
+                <input type="date" id="filtro-desde" class="bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-2 text-sm text-white">
             </div>
-            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800">
-                <p class="text-xs text-zinc-400 uppercase tracking-wider">Parte Dueño (35%)</p>
-                <p id="total-dueno" class="text-3xl font-bold text-sky-400 mt-2">$0.00</p>
+            <div>
+                <label class="block text-xs text-zinc-400 mb-1">Hasta</label>
+                <input type="date" id="filtro-hasta" class="bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-2 text-sm text-white">
             </div>
-            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800">
-                <p class="text-xs text-zinc-400 uppercase tracking-wider">Barberos Pendiente (65%)</p>
-                <p id="total-pendiente" class="text-3xl font-bold text-amber-400 mt-2">$0.00</p>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="periodoRapido('semana')" class="px-3 py-2 rounded border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800">Esta semana</button>
+                <button type="button" onclick="periodoRapido('quincena')" class="px-3 py-2 rounded border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800">Esta quincena</button>
+                <button type="button" onclick="periodoRapido('mes')" class="px-3 py-2 rounded border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800">Este mes</button>
+                <button type="button" onclick="periodoRapido('todo')" class="px-3 py-2 rounded border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800">Todo</button>
             </div>
-            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800">
-                <p class="text-xs text-zinc-400 uppercase tracking-wider">Barberos Pagado</p>
-                <p id="total-pagado" class="text-3xl font-bold text-emerald-400 mt-2">$0.00</p>
-            </div>
+            <p id="texto-periodo" class="text-xs text-zinc-500 w-full"></p>
         </div>
 
-        <!-- Resumen por Barbero -->
-        <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-6xl mb-8">
-            <div class="p-4 border-b border-zinc-800">
-                <h2 class="text-lg font-bold">Resumen por Barbero</h2>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mb-8">
+            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800"><p class="text-xs text-zinc-400">Total Servicios</p><p id="total-servicios" class="text-3xl font-bold text-white mt-2">$0.00</p></div>
+            <div class="solo-admin bg-[#111111] p-5 rounded-xl border border-zinc-800"><p class="text-xs text-zinc-400">Parte del Negocio</p><p id="total-dueno" class="text-3xl font-bold text-sky-400 mt-2">$0.00</p></div>
+            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800"><p id="label-pendiente" class="text-xs text-zinc-400">Barberos Pendiente</p><p id="total-pendiente" class="text-3xl font-bold text-amber-400 mt-2">$0.00</p></div>
+            <div class="bg-[#111111] p-5 rounded-xl border border-zinc-800"><p id="label-pagado" class="text-xs text-zinc-400">Barberos Pagado</p><p id="total-pagado" class="text-3xl font-bold text-emerald-400 mt-2">$0.00</p></div>
+        </div>
+
+        <div class="solo-admin bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-6xl mb-8">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-zinc-300">
-                    <thead class="bg-zinc-800/60 text-white border-b border-zinc-800">
-                        <tr>
-                            <th class="px-4 py-3 font-semibold">Barbero</th>
-                            <th class="px-4 py-3 font-semibold">Cortes</th>
-                            <th class="px-4 py-3 font-semibold">Generado en Cortes</th>
-                            <th class="px-4 py-3 font-semibold">Pendiente (65%)</th>
-                            <th class="px-4 py-3 font-semibold">Pagado</th>
-                            <th class="px-4 py-3 font-semibold text-right">Liquidación</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-resumen-barberos" class="divide-y divide-zinc-800">
-                        <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-zinc-400">Cargando resumen...</td>
-                        </tr>
-                    </tbody>
+                    <thead class="bg-zinc-800/60 text-white border-b border-zinc-800"><tr><th class="px-4 py-3">Barbero</th><th class="px-4 py-3">Cortes</th><th class="px-4 py-3">Generado</th><th class="px-4 py-3">Pendiente</th><th class="px-4 py-3">Pagado</th><th class="px-4 py-3 text-right">Liquidación</th></tr></thead>
+                    <tbody id="tabla-resumen-barberos" class="divide-y divide-zinc-800"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Detalle de Cortes / Comisiones -->
         <div class="bg-[#111111] rounded-xl border border-zinc-800 overflow-hidden max-w-6xl">
-            <div class="p-4 border-b border-zinc-800 flex flex-wrap justify-between items-center gap-3">
-                <h2 class="text-lg font-bold">Detalle de Comisiones por Corte</h2>
-                <div class="flex gap-2">
-                    <select id="filtro-barbero" onchange="cargarComisiones()" class="bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-1.5 text-sm text-white">
-                        <option value="">Todos los barberos</option>
-                    </select>
-                    <select id="filtro-estado" onchange="cargarComisiones()" class="bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-1.5 text-sm text-white">
-                        <option value="">Todos los estados</option>
-                        <option value="PENDIENTE">PENDIENTE</option>
-                        <option value="PAGADO">PAGADO</option>
-                    </select>
+            <div class="p-4 border-b border-zinc-800 flex flex-wrap gap-3 justify-between items-center">
+                <h2 class="text-lg font-bold">Detalle de Cortes</h2>
+                <div class="flex flex-wrap gap-2">
+                    <select id="filtro-barbero" class="solo-admin bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-2 text-sm text-white"><option value="">Todos los barberos</option></select>
+                    <select id="filtro-estado" class="bg-[#0a0a0a] border border-zinc-700 rounded px-3 py-2 text-sm text-white"><option value="">Todos los estados</option><option value="PENDIENTE">PENDIENTE</option><option value="PAGADO">PAGADO</option></select>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-zinc-300">
-                    <thead class="bg-zinc-800/60 text-white border-b border-zinc-800">
-                        <tr>
-                            <th class="px-4 py-3 font-semibold">Barbero</th>
-                            <th class="px-4 py-3 font-semibold">Servicio / Corte</th>
-                            <th class="px-4 py-3 font-semibold">Monto Corte</th>
-                            <th class="px-4 py-3 font-semibold">% Barbero</th>
-                            <th class="px-4 py-3 font-semibold">Comisión</th>
-                            <th class="px-4 py-3 font-semibold">Estado</th>
-                            <th class="px-4 py-3 font-semibold text-right">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-comisiones" class="divide-y divide-zinc-800">
-                        <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-zinc-400">Cargando comisiones...</td>
-                        </tr>
-                    </tbody>
+                    <thead class="bg-zinc-800/60 border-b border-zinc-800"><tr><th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Barbero</th><th class="px-4 py-3">Servicio</th><th class="px-4 py-3">Corte</th><th class="px-4 py-3">Comisión</th><th class="px-4 py-3">Estado</th><th class="solo-admin px-4 py-3 text-right">Acción</th></tr></thead>
+                    <tbody id="tabla-comisiones" class="divide-y divide-zinc-800"></tbody>
                 </table>
             </div>
         </div>
     </main>
 
     <script>
+        // Utilidades comunes (toast, spinner, sesión, escaparHTML) vienen de app.js
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'login.html';
+        const esAdmin = localStorage.getItem('rol') === '1';
+        const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+        const dinero = (n) => `$${Number(n || 0).toFixed(2)}`;
+        let ultimasComisiones = []; // lo que se ve en pantalla, para exportarlo
+        document.getElementById('fecha-impresion').textContent = new Date().toLocaleString('es-MX');
 
-        const rolUsuario = localStorage.getItem('rol');
-        if (rolUsuario !== '1') {
-            window.location.href = 'dashboard.html';
+        if (!esAdmin) {
+            // Vista de consulta para el barbero: solo sus comisiones, sin acciones de pago
+            document.querySelectorAll('.solo-admin').forEach(el => el.style.display = 'none');
+            document.getElementById('titulo-pagina').textContent = 'Mis Comisiones';
+            document.getElementById('label-pendiente').textContent = 'Pendiente por cobrar';
+            document.getElementById('label-pagado').textContent = 'Ya pagado';
+        }
+
+        // ---- Periodo ----
+        function formatoFecha(d) {
+            const f = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+            return f.toISOString().split('T')[0];
+        }
+        function periodoRapido(tipo) {
+            const hoy = new Date();
+            let desde = '', hasta = '';
+            if (tipo === 'semana') {
+                const lunes = new Date(hoy);
+                lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+                desde = formatoFecha(lunes); hasta = formatoFecha(hoy);
+            } else if (tipo === 'quincena') {
+                const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() <= 15 ? 1 : 16);
+                desde = formatoFecha(inicio); hasta = formatoFecha(hoy);
+            } else if (tipo === 'mes') {
+                desde = formatoFecha(new Date(hoy.getFullYear(), hoy.getMonth(), 1)); hasta = formatoFecha(hoy);
+            }
+            document.getElementById('filtro-desde').value = desde;
+            document.getElementById('filtro-hasta').value = hasta;
+            cargarComisiones();
         }
 
         async function cargarFiltroBarberos() {
+            if (!esAdmin) return;
             try {
-                const res = await fetch('/api/barberos', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!res.ok) return;
+                const res = await fetch('/api/barberos', { headers: authHeaders() });
+                if (!res.ok) throw new Error(await leerError(res, 'No se pudieron cargar los barberos'));
                 const barberos = await res.json();
-                const select = document.getElementById('filtro-barbero');
-                select.innerHTML = '<option value="">Todos los barberos</option>';
-                barberos.forEach(b => {
-                    select.innerHTML += `<option value="${b.id}">${b.nombre}</option>`;
-                });
-            } catch (error) {
-                console.error('Error cargando filtro de barberos:', error);
+                document.getElementById('filtro-barbero').innerHTML = '<option value="">Todos los barberos</option>' +
+                    barberos.map(b => `<option value="${b.id}">${escaparHTML(b.nombre)}</option>`).join('');
+            } catch (e) {
+                mostrarToast(e.message, 'error');
             }
-        }
-
-        function renderResumenPorBarbero(rows) {
-            const tbody = document.getElementById('tabla-resumen-barberos');
-            if (!rows || rows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-zinc-400">Aún no hay cortes con comisión calculada.</td></tr>';
-                return;
-            }
-
-            const mapa = new Map();
-            rows.forEach(r => {
-                const key = r.barbero_id || r.nombre_barbero || 'sin-id';
-                if (!mapa.has(key)) {
-                    mapa.set(key, {
-                        barbero_id: r.barbero_id,
-                        nombre: r.nombre_barbero || 'Barbero',
-                        cortes: 0,
-                        bruto: 0,
-                        pendiente: 0,
-                        pagado: 0
-                    });
-                }
-                const item = mapa.get(key);
-                item.cortes += 1;
-                item.bruto += Number(r.monto_servicio || 0);
-                const com = Number(r.monto_comision || 0);
-                if (r.estado === 'PAGADO') item.pagado += com;
-                else item.pendiente += com;
-            });
-
-            tbody.innerHTML = '';
-            mapa.forEach(b => {
-                const btnLiquidar = b.pendiente > 0 && b.barbero_id
-                    ? `<button onclick="liquidarBarbero('${b.barbero_id}')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-600/40 px-3 py-1 rounded text-xs font-semibold transition">Liquidar $${b.pendiente.toFixed(2)}</button>`
-                    : '<span class="text-xs text-zinc-500">Al día</span>';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-zinc-800/30 transition">
-                        <td class="px-4 py-3 text-white font-medium">${b.nombre}</td>
-                        <td class="px-4 py-3">${b.cortes}</td>
-                        <td class="px-4 py-3 text-zinc-200">$${b.bruto.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-amber-400 font-semibold">$${b.pendiente.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-emerald-400 font-semibold">$${b.pagado.toFixed(2)}</td>
-                        <td class="px-4 py-3 text-right">${btnLiquidar}</td>
-                    </tr>
-                `;
-            });
         }
 
         async function cargarComisiones() {
+            const p = new URLSearchParams();
+            const est = document.getElementById('filtro-estado').value;
+            const barb = document.getElementById('filtro-barbero').value;
+            const desde = document.getElementById('filtro-desde').value;
+            const hasta = document.getElementById('filtro-hasta').value;
+            if (est) p.append('estado', est);
+            if (barb && esAdmin) p.append('barbero_id', barb);
+            if (desde) p.append('desde', desde);
+            if (hasta) p.append('hasta', hasta);
+
+            document.getElementById('texto-periodo').textContent = desde || hasta
+                ? `Mostrando cortes del ${desde || 'inicio'} al ${hasta || 'hoy'}`
+                : 'Mostrando todos los cortes';
+
             const tbody = document.getElementById('tabla-comisiones');
-            const estado = document.getElementById('filtro-estado').value;
-            const barberoId = document.getElementById('filtro-barbero').value;
-
-            const params = new URLSearchParams();
-            if (estado) params.append('estado', estado);
-            if (barberoId) params.append('barbero_id', barberoId);
-
-            const url = `/api/comisiones${params.toString() ? '?' + params.toString() : ''}`;
-
             try {
-                const res = await fetch(url, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
-                if (!res.ok) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error al cargar comisiones.</td></tr>';
-                    return;
-                }
-
+                const res = await fetch(`/api/comisiones${p.toString() ? '?' + p.toString() : ''}`, { headers: authHeaders() });
+                if (!res.ok) throw new Error(await leerError(res, 'No se pudieron cargar las comisiones'));
                 const rows = await res.json();
+                ultimasComisiones = rows;
 
-                let totalServ = 0;
-                let totalDueno = 0;
-                let pend = 0;
-                let pag = 0;
-
+                let totalServ = 0, totalNegocio = 0, pendiente = 0, pagado = 0;
+                const mapa = new Map();
                 rows.forEach(r => {
-                    const serv = Number(r.monto_servicio || 0);
-                    const com = Number(r.monto_comision || 0);
-                    const pct = Number(r.porcentaje_aplicado || 65);
-                    totalServ += serv;
-                    totalDueno += serv * ((100 - pct) / 100);
-                    if (r.estado === 'PAGADO') pag += com;
-                    else pend += com;
+                    const servicio = Number(r.monto_servicio);
+                    const comision = Number(r.monto_comision);
+                    totalServ += servicio;
+                    totalNegocio += servicio - comision; // lo que queda al negocio según el % aplicado
+                    if (r.estado === 'PAGADO') pagado += comision; else pendiente += comision;
+
+                    if (!mapa.has(r.barbero_id)) mapa.set(r.barbero_id, { id: r.barbero_id, nom: r.nombre_barbero, cortes: 0, bruto: 0, pen: 0, pag: 0 });
+                    const m = mapa.get(r.barbero_id);
+                    m.cortes++; m.bruto += servicio;
+                    if (r.estado === 'PAGADO') m.pag += comision; else m.pen += comision;
                 });
 
-                document.getElementById('total-servicios').textContent = `$${totalServ.toFixed(2)}`;
-                document.getElementById('total-dueno').textContent = `$${totalDueno.toFixed(2)}`;
-                document.getElementById('total-pendiente').textContent = `$${pend.toFixed(2)}`;
-                document.getElementById('total-pagado').textContent = `$${pag.toFixed(2)}`;
+                document.getElementById('total-servicios').textContent = dinero(totalServ);
+                document.getElementById('total-dueno').textContent = dinero(totalNegocio);
+                document.getElementById('total-pendiente').textContent = dinero(pendiente);
+                document.getElementById('total-pagado').textContent = dinero(pagado);
 
-                renderResumenPorBarbero(rows);
+                document.getElementById('tabla-resumen-barberos').innerHTML = [...mapa.values()].map(b => `
+                    <tr class="hover:bg-zinc-800/30">
+                        <td class="px-4 py-3">${escaparHTML(b.nom)}</td><td class="px-4 py-3">${b.cortes}</td><td class="px-4 py-3">${dinero(b.bruto)}</td>
+                        <td class="px-4 py-3 text-amber-400">${dinero(b.pen)}</td><td class="px-4 py-3 text-emerald-400">${dinero(b.pag)}</td>
+                        <td class="px-4 py-3 text-right">${b.pen > 0 ? `<button onclick="liquidarBarbero('${b.id}', '${escaparHTML(b.nom)}', ${b.pen}, this)" class="text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded text-xs hover:bg-emerald-600/20">Liquidar ${dinero(b.pen)}</button>` : '<span class="text-zinc-500 text-xs">Al día</span>'}</td>
+                    </tr>`).join('') || '<tr><td colspan="6" class="text-center py-6 text-zinc-500">Sin comisiones en este periodo</td></tr>';
 
-                if (rows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-zinc-400">No hay comisiones registradas con este filtro.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = '';
-                rows.forEach(r => {
-                    const esPagado = r.estado === 'PAGADO';
-                    const badge = esPagado
-                        ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-700/40">PAGADO</span>'
-                        : '<span class="text-xs px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-700/40">PENDIENTE</span>';
-
-                    const accion = !esPagado
-                        ? `<button onclick="marcarPagada('${r.id}')" class="text-emerald-400 hover:text-emerald-300 text-xs font-semibold border border-emerald-700/50 px-2.5 py-1 rounded transition">Marcar pagada</button>`
-                        : `<span class="text-xs text-zinc-500">${r.fecha_liquidacion ? new Date(r.fecha_liquidacion).toLocaleDateString('es-MX') : 'Liquidada'}</span>`;
-
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-zinc-800/30 transition">
-                            <td class="px-4 py-3 text-white font-medium">${r.nombre_barbero || 'Barbero'}</td>
-                            <td class="px-4 py-3 text-zinc-300">${r.nombre_servicio || 'Corte / Servicio'}</td>
-                            <td class="px-4 py-3 text-zinc-200">$${Number(r.monto_servicio || 0).toFixed(2)}</td>
-                            <td class="px-4 py-3 text-zinc-400">${Number(r.porcentaje_aplicado || 65)}%</td>
-                            <td class="px-4 py-3 font-semibold text-emerald-400">$${Number(r.monto_comision || 0).toFixed(2)}</td>
-                            <td class="px-4 py-3">${badge}</td>
-                            <td class="px-4 py-3 text-right">${accion}</td>
-                        </tr>
-                    `;
-                });
-            } catch (error) {
-                console.error('Error cargando comisiones:', error);
-                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-red-400">Error de conexión.</td></tr>';
+                tbody.innerHTML = rows.map(r => `
+                    <tr class="hover:bg-zinc-800/30">
+                        <td class="px-4 py-3 whitespace-nowrap">${escaparHTML(r.fecha_cita || '—')}</td>
+                        <td class="px-4 py-3">${escaparHTML(r.nombre_barbero)}</td><td class="px-4 py-3">${escaparHTML(r.nombre_servicio)}</td><td class="px-4 py-3">${dinero(r.monto_servicio)}</td>
+                        <td class="px-4 py-3 text-emerald-400 font-bold">${dinero(r.monto_comision)} <span class="text-[10px] text-zinc-500 font-normal">(${Number(r.porcentaje_aplicado)}%)</span></td>
+                        <td class="px-4 py-3"><span class="text-[10px] px-2 py-1 rounded bg-zinc-900 ${r.estado === 'PAGADO' ? 'text-emerald-400' : 'text-amber-400'}">${r.estado}</span></td>
+                        ${esAdmin ? `<td class="px-4 py-3 text-right">${r.estado !== 'PAGADO' ? `<button onclick="marcarPagada('${r.id}', this)" class="text-emerald-400 text-xs hover:text-emerald-300">Marcar Pagada</button>` : '—'}</td>` : ''}
+                    </tr>`).join('') || `<tr><td colspan="${esAdmin ? 7 : 6}" class="text-center py-6 text-zinc-500">Sin comisiones en este periodo</td></tr>`;
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-400">${escaparHTML(e.message)}</td></tr>`;
+                mostrarToast(e.message, 'error');
             }
         }
 
-        async function sincronizarCitas() {
+        async function sincronizarCitas(btn) {
+            toggleCargando(btn, true);
             try {
-                const res = await fetch('/api/comisiones/calcular-citas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ porcentaje: 65 })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    await cargarComisiones();
-                } else {
-                    alert(data.message || 'No se pudieron calcular las comisiones');
-                }
-            } catch (error) {
-                console.error(error);
-            }
+                const res = await fetch('/api/comisiones/calcular-citas', { method: 'POST', headers: authHeaders(), body: JSON.stringify({ porcentaje: 65 }) });
+                if (res.ok) { mostrarToast((await res.json()).message, 'exito'); await cargarComisiones(); }
+                else mostrarToast(await leerError(res, 'No se pudieron calcular'), 'error');
+            } catch (e) { mostrarToast('Error de conexión', 'error'); }
+            toggleCargando(btn, false);
         }
 
-        async function marcarPagada(id) {
+        async function marcarPagada(id, btn) {
+            toggleCargando(btn, true);
             try {
-                const res = await fetch(`/api/comisiones/${id}/pagar`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    await cargarComisiones();
-                } else {
-                    alert(data.message || 'No se pudo marcar como pagada');
-                }
-            } catch (error) {
-                console.error(error);
-            }
+                const res = await fetch(`/api/comisiones/${id}/pagar`, { method: 'PUT', headers: authHeaders() });
+                if (res.ok) { mostrarToast('Comisión marcada como pagada', 'exito'); await cargarComisiones(); return; }
+                mostrarToast(await leerError(res, 'No se pudo marcar como pagada'), 'error');
+            } catch (e) { mostrarToast('Error de conexión', 'error'); }
+            toggleCargando(btn, false);
         }
 
-        async function liquidarBarbero(barberoId) {
-            if (!confirm('¿Marcar todas las comisiones pendientes de este barbero como PAGADO?')) return;
+        async function liquidarBarbero(id, nombre, monto, btn) {
+            const desde = document.getElementById('filtro-desde').value;
+            const hasta = document.getElementById('filtro-hasta').value;
+            const periodo = desde || hasta ? ' del periodo seleccionado' : '';
+            if (!(await confirmar(`¿Liquidar ${dinero(monto)} a ${nombre}?`, { detalle: `Se marcarán como pagadas sus comisiones pendientes${periodo}.`, textoConfirmar: 'Sí, liquidar' }))) return;
+            toggleCargando(btn, true);
             try {
-                const res = await fetch('/api/comisiones/liquidar-barbero', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ barbero_id: barberoId })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(data.message);
-                    await cargarComisiones();
-                } else {
-                    alert(data.message || 'No se pudo liquidar');
-                }
-            } catch (error) {
-                console.error(error);
+                const res = await fetch('/api/comisiones/liquidar-barbero', { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ barbero_id: id, desde, hasta }) });
+                if (res.ok) { mostrarToast((await res.json()).message || 'Barbero liquidado', 'exito'); await cargarComisiones(); return; }
+                mostrarToast(await leerError(res, 'No se pudo liquidar'), 'error');
+            } catch (e) { mostrarToast('Error de conexión', 'error'); }
+            toggleCargando(btn, false);
+        }
+
+        // Exporta a Excel exactamente lo que está filtrado en pantalla
+        function exportarComisiones() {
+            if (ultimasComisiones.length === 0) {
+                mostrarToast('No hay comisiones en el periodo para exportar', 'aviso');
+                return;
             }
+            const filas = ultimasComisiones.map(r => [
+                r.fecha_cita || '',
+                r.nombre_barbero,
+                r.nombre_servicio,
+                Number(r.monto_servicio).toFixed(2),
+                `${Number(r.porcentaje_aplicado)}%`,
+                Number(r.monto_comision).toFixed(2),
+                (Number(r.monto_servicio) - Number(r.monto_comision)).toFixed(2),
+                r.estado,
+                r.fecha_liquidacion ? new Date(r.fecha_liquidacion).toLocaleDateString('es-MX') : ''
+            ]);
+            exportarCSV(esAdmin ? 'comisiones' : 'mis_comisiones',
+                ['Fecha cita', 'Barbero', 'Servicio', 'Precio servicio', '% comisión', 'Comisión barbero', 'Parte negocio', 'Estado', 'Fecha de pago'],
+                filas);
         }
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
+        ['filtro-barbero', 'filtro-estado', 'filtro-desde', 'filtro-hasta']
+            .forEach(id => document.getElementById(id).addEventListener('change', cargarComisiones));
 
-        (async () => {
-            await cargarFiltroBarberos();
-            await cargarComisiones();
-        })();
+        cargarFiltroBarberos().then(cargarComisiones);
     </script>
 </body>
 </html>

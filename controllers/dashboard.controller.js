@@ -1,20 +1,13 @@
-const { Pool } = require('pg');
 require('dotenv').config();
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+const pool = require('../config/db');
 
 const obtenerResumen = async (req, res) => {
     try {
-        // 1. Contar citas del día (que no estén canceladas)
+        // 1. Contar citas del día que siguen pendientes de atender (ni cobradas, ni canceladas, ni "no asistió")
         const citasResult = await pool.query(`
             SELECT COUNT(*) FROM citas 
-            WHERE fecha_cita = CURRENT_DATE AND estado != 'CANCELADA'
+            WHERE fecha_cita = CURRENT_DATE AND estado IN ('PENDIENTE', 'CONFIRMADA')
         `);
 
         // 2. Sumar Ingresos del día por citas completadas

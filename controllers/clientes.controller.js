@@ -1,16 +1,10 @@
-const { Pool } = require('pg');
 const crypto = require('crypto');
 require('dotenv').config();
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+const pool = require('../config/db');
 
 const ROL_CLIENTE = 3;
+const idNuevoCorto = () => crypto.randomUUID().slice(0, 8);
 
 const listarClientes = async (req, res) => {
     try {
@@ -98,6 +92,9 @@ const crearClienteRapido = async (req, res) => {
             });
         }
 
+        // La columna email es obligatoria y única: si no se captura, se genera uno interno con el teléfono
+        const emailFinal = emailLimpio || `${telLimpio.replace(/\D/g, '') || idNuevoCorto()}@clientes.capitalhub.local`;
+
         const idNuevo = crypto.randomUUID();
         const passwordTemporal = crypto.createHash('sha256').update(crypto.randomUUID()).digest('hex');
 
@@ -108,9 +105,9 @@ const crearClienteRapido = async (req, res) => {
             [
                 idNuevo,
                 nombreLimpio,
-                apellidosLimpio || null,
+                apellidosLimpio,          // apellidos es NOT NULL: se guarda vacío si no se captura
                 telLimpio,
-                emailLimpio || null,
+                emailFinal,
                 passwordTemporal,
                 ROL_CLIENTE
             ]

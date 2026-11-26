@@ -1,14 +1,7 @@
-const { Pool } = require('pg');
 const crypto = require('crypto');
 require('dotenv').config();
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+const pool = require('../config/db');
 
 const listarCategorias = async (req, res) => {
     try {
@@ -93,7 +86,8 @@ const crearProducto = async (req, res) => {
              RETURNING *`,
             [
                 categoria_id ? Number(categoria_id) : null,
-                (sku || '').trim() || null,
+                // Si no se captura SKU se genera uno automático (la columna es obligatoria y única)
+                (sku || '').trim() || `PROD-${Date.now().toString(36).toUpperCase()}`,
                 nombre.trim(),
                 (descripcion || '').trim() || null,
                 Number(precio),
@@ -105,6 +99,9 @@ const crearProducto = async (req, res) => {
 
         res.status(201).json({ message: 'Producto registrado con éxito', producto: result.rows[0] });
     } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ message: 'Ese SKU ya lo usa otro producto.' });
+        }
         console.error('Error al crear producto:', error);
         res.status(500).json({ message: 'Error interno al crear producto' });
     }
@@ -132,9 +129,10 @@ const actualizarProducto = async (req, res) => {
             campos.push(`categoria_id = $${idx++}`);
             valores.push(categoria_id ? Number(categoria_id) : null);
         }
-        if (sku !== undefined) {
+        // El SKU es obligatorio: si llega vacío se conserva el actual
+        if (sku !== undefined && String(sku).trim()) {
             campos.push(`sku = $${idx++}`);
-            valores.push((sku || '').trim() || null);
+            valores.push(String(sku).trim());
         }
         if (nombre !== undefined) {
             if (!String(nombre).trim()) {
@@ -189,6 +187,9 @@ const actualizarProducto = async (req, res) => {
 
         res.status(200).json({ message: 'Producto actualizado', producto: result.rows[0] });
     } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ message: 'Ese SKU ya lo usa otro producto.' });
+        }
         console.error('Error al actualizar producto:', error);
         res.status(500).json({ message: 'Error interno al actualizar producto' });
     }
@@ -207,6 +208,13 @@ const registrarVentaRapida = async (req, res) => {
             metodo_pago,
             estado
         } = req.body;
+
+        // Métodos de pago en mostrador: efectivo o tarjeta en terminal (PASARELA_ONLINE es para la tienda web)
+        const METODOS_PAGO = ['EFECTIVO_LOCAL', 'TARJETA_LOCAL', 'PASARELA_ONLINE'];
+        if (metodo_pago && !METODOS_PAGO.includes(metodo_pago)) {
+            client.release();
+            return res.status(400).json({ message: 'Método de pago no válido' });
+        }
 
         const cant = Number(cantidad);
         if (!producto_id || !Number.isInteger(cant) || cant <= 0) {
@@ -246,7 +254,7 @@ const registrarVentaRapida = async (req, res) => {
         const subtotal = Number((precioUnitario * cant).toFixed(2));
         const total = subtotal;
         const ventaId = crypto.randomUUID();
-        const usuarioId = req.usuario && req.usuario.id ? req.usuario.id : null;
+        const usuarioId = req.user && req.user.id ? req.user.id : null;
 
         await client.query(
             `INSERT INTO ventas
@@ -258,7 +266,8 @@ const registrarVentaRapida = async (req, res) => {
                 usuarioId,
                 (nombre_comprador || 'Cliente en mostrador').trim(),
                 (email_comprador || '').trim() || 'mostrador@capitalhub.local',
-                (telefono_comprador || '').trim() || null,
+                // Venta de mostrador: la columna es obligatoria, se usa un valor genérico si no se captura
+                (telefono_comprador || '').trim() || 'MOSTRADOR',
                 tipo_entrega || 'RECOGER_LOCAL',
                 metodo_pago || 'EFECTIVO_LOCAL',
                 estado || 'ENTREGADA',
@@ -293,8 +302,12 @@ const registrarVentaRapida = async (req, res) => {
     } catch (error) {
         await client.query('ROLLBACK');
         client.release();
+        // 22P02 = valor fuera del ENUM (falta agregar TARJETA_LOCAL a tipo_metodo_pago en la base)
+        if (error.code === '22P02') {
+            return res.status(400).json({ message: 'La base de datos aún no acepta ese método de pago. Corre el SQL de actualización.' });
+        }
         console.error('Error al registrar venta rápida:', error);
-        res.status(500).json({ message: error.message || 'Error interno al registrar la venta' });
+        res.status(500).json({ message: 'Error interno al registrar la venta' });
     }
 };
 

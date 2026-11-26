@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>CapitalHub - Panel Principal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js"></script>
+    <script src="menu-movil.js"></script>
 </head>
 <body class="bg-[#0a0a0a] text-white flex h-screen font-sans">
     
-    <!-- Menú Lateral -->
+
     <aside class="w-64 bg-[#111111] border-r border-zinc-800 flex flex-col">
         <div class="p-6 border-b border-zinc-800 flex items-center gap-3">
             <img src="Logo_blanco.png" alt="Logo CapitalHub" class="h-10 w-auto object-contain">
             <h2 class="text-xl font-bold tracking-wider">CAPITAL<span class="text-zinc-500">HUB</span></h2>
         </div>
         <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Dashboard</a>
+            <a href="dashboard.html" class="block px-4 py-2 bg-zinc-800 rounded-lg text-white">Dashboard</a>
             <a href="citas.html" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Agenda de Citas</a>
             <a href="catalogo.html" id="menu-catalogo" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Catálogo</a>
             <a href="clientes.html" id="menu-clientes" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Clientes</a>
             <a href="barberos.html" id="menu-barberos" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Barberos</a>
             <a href="servicios.html" id="menu-servicios" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Servicios</a>
+            <a href="comisiones.html" id="menu-comisiones" class="block px-4 py-2 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg transition">Comisiones</a>
         </nav>
         <div class="p-4 border-t border-zinc-800">
             <button onclick="cerrarSesion()" class="w-full bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 rounded-lg hover:bg-red-800 transition">
@@ -28,17 +32,14 @@
         </div>
     </aside>
 
-    <!-- Contenido Principal -->
     <main class="flex-1 p-8 overflow-y-auto">
         <header class="flex justify-between items-center mb-10">
             <div>
-                <!-- El nombre se llenará por JS, si no hay pondrá Administrador -->
                 <h1 class="text-3xl font-bold">Bienvenido, <span id="user-name" class="text-[#e5e5e5]"></span></h1>
                 <p class="text-zinc-400 mt-1">Resumen operativo de hoy</p>
             </div>
         </header>
 
-        <!-- Grid de Indicadores -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-[#111111] p-6 rounded-xl border border-zinc-800">
                 <h3 class="text-zinc-400 text-sm mb-2">Citas Pendientes</h3>
@@ -64,178 +65,145 @@
     </main>
 
     <script>
+        // Utilidades comunes (toast, spinner, sesión, escaparHTML) vienen de app.js
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'login.html';
-        }
-        
-        // CORRECCIÓN 1: Si no hay nombre en memoria, le pone 'Administrador'
-        const nombreUsuario = localStorage.getItem('nombre');
-        document.getElementById('user-name').textContent = nombreUsuario || 'Administrador';
-        
         const rolUsuario = localStorage.getItem('rol');
+        const nombreUsuario = localStorage.getItem('nombre');
+        const esAdmin = rolUsuario === '1';
 
-        if (rolUsuario !== '1') {
+        if (!esAdmin) {
+            // El barbero no ve ingresos ni conteo de barberos
             document.getElementById('tarjeta-ingresos').style.display = 'none';
             document.getElementById('tarjeta-barberos').style.display = 'none';
-            document.getElementById('menu-catalogo').style.display = 'none';
-            document.getElementById('menu-clientes').style.display = 'none';
-            document.getElementById('menu-barberos').style.display = 'none';
-            document.getElementById('menu-servicios').style.display = 'none';
         } else {
-            // Si es admin, cambiamos el título de la lista
             document.getElementById('titulo-citas').textContent = 'Todas las Citas de Hoy';
         }
 
+        document.getElementById('user-name').textContent = nombreUsuario || 'Administrador';
+
         async function cargarResumen() {
+            if (!esAdmin) return; // el resumen financiero es solo del admin
             try {
                 const response = await fetch('/api/dashboard/resumen', {
-                    method: 'GET',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                const data = await response.json();
-                
-                if (response.ok) {
-                    const totalIngresos = Number(data.ingresos || 0);
-                    const totalCitas = Number(data.ingresosCitas || 0);
-                    const totalProductos = Number(data.ingresosProductos || 0);
-
-                    document.getElementById('citas-count').textContent = data.citasPendientes;
-                    document.getElementById('ingresos-total').textContent = '$' + totalIngresos.toFixed(2);
-                    document.getElementById('desglose-ingresos').textContent =
-                        `Citas: $${totalCitas.toFixed(2)} · Productos: $${totalProductos.toFixed(2)}`;
-                    document.getElementById('barberos-count').textContent = data.barberosActivos;
+                if (!response.ok) {
+                    mostrarToast(await leerError(response, 'No se pudo cargar el resumen'), 'error');
+                    return;
                 }
+                const data = await response.json();
+                document.getElementById('citas-count').textContent = data.citasPendientes;
+                document.getElementById('ingresos-total').textContent = '$' + Number(data.ingresos || 0).toFixed(2);
+                document.getElementById('desglose-ingresos').textContent = `Citas: $${Number(data.ingresosCitas || 0).toFixed(2)} · Productos: $${Number(data.ingresosProductos || 0).toFixed(2)}`;
+                document.getElementById('barberos-count').textContent = data.barberosActivos;
             } catch (error) {
-                console.error('Error al cargar el resumen:', error);
+                console.error(error);
+                mostrarToast('Error de conexión al cargar el resumen', 'error');
             }
         }
 
+        // Etiqueta visual de cada estado de cita
+        const ESTILO_ESTADO = {
+            COMPLETADA: { borde: 'border-emerald-500 opacity-75', etiqueta: '<span class="text-emerald-400 text-xs font-bold mt-1 block">✓ Pagado</span>' },
+            CANCELADA: { borde: 'border-red-500 opacity-50', etiqueta: '<span class="text-red-400 text-xs font-bold mt-1 block">✗ Cancelada</span>' },
+            NO_ASISTIO: { borde: 'border-amber-500 opacity-60', etiqueta: '<span class="text-amber-400 text-xs font-bold mt-1 block">⚠ No asistió</span>' }
+        };
+
         async function cargarCitasDeHoy() {
             const contenedor = document.getElementById('contenedor-citas');
-            let barberoIdReal = localStorage.getItem('usuario_id'); 
-            
-            const fecha = new Date();
-            fecha.setMinutes(fecha.getMinutes() - fecha.getTimezoneOffset());
-            const hoy = fecha.toISOString().split('T')[0];
+            const hoy = fechaHoyLocal();
 
-            // CORRECCIÓN 2: Lógica dinámica para la ruta
-            let endpoint = '/api/citas/mis-citas';
-            let datosBody = { barbero_id: barberoIdReal, fecha: hoy };
+            let endpoint = '/api/citas/todas-hoy';
+            let datosBody = { fecha: hoy };
 
-            if (rolUsuario === '1') {
-                endpoint = '/api/citas/todas-hoy'; // Ruta de Admin
-                datosBody = { fecha: hoy }; // El admin no filtra por un solo barbero
-            } else {
-                // Si es un barbero normal, intentamos buscar su ID real por nombre si es necesario
-                try {
-                    const resBarberos = await fetch('/api/barberos', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (resBarberos.ok) {
-                        const barberos = await resBarberos.json();
-                        const barberoCorrecto = barberos.find(b => b.nombre.includes(nombreUsuario));
-                        if (barberoCorrecto) {
-                            datosBody.barbero_id = barberoCorrecto.id;
-                        }
-                    }
-                } catch (e) {
-                    console.error("Error buscando ID de barbero:", e);
+            if (!esAdmin) {
+                // El barbero viene enlazado desde el login; el backend además solo le regresa sus citas
+                endpoint = '/api/citas/mis-citas';
+                datosBody = { barbero_id: localStorage.getItem('barbero_id'), fecha: hoy };
+                if (!datosBody.barbero_id) {
+                    contenedor.innerHTML = '<p class="text-amber-400">Tu usuario no está enlazado a un barbero. Avisa al administrador.</p>';
+                    return;
                 }
             }
 
             try {
                 const respuesta = await fetch(endpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(datosBody)
                 });
-
+                if (!respuesta.ok) throw new Error(await leerError(respuesta, 'Respuesta inválida'));
                 const citas = await respuesta.json();
+
+                // El barbero no tiene acceso al resumen: contamos sus pendientes aquí
+                if (!esAdmin) {
+                    document.getElementById('citas-count').textContent =
+                        citas.filter(c => c.estado === 'PENDIENTE' || c.estado === 'CONFIRMADA').length;
+                }
 
                 if (citas.length === 0) {
                     contenedor.innerHTML = '<p class="text-gray-400">No hay citas agendadas para hoy.</p>';
                     return;
                 }
 
-                contenedor.innerHTML = '';
-                citas.forEach(cita => {
-                    const [hora, min] = cita.hora_inicio.split(':');
-                    const hora12 = new Date(2000, 0, 1, hora, min).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                contenedor.innerHTML = citas.map(cita => {
+                    const estilo = ESTILO_ESTADO[cita.estado];
+                    const abierta = !estilo; // PENDIENTE o CONFIRMADA
+                    const etiquetaBarbero = esAdmin && cita.nombre_barbero
+                        ? `<p class="text-blue-400 text-sm font-semibold mt-1">💈 Barbero: ${escaparHTML(cita.nombre_barbero)}</p>` : '';
+                    const botonNoAsistio = abierta && cita.paso_tolerancia
+                        ? `<button onclick="cambiarEstadoCita('${cita.id}', 'NO_ASISTIO', this)" class="text-amber-400 hover:text-amber-300 transition text-sm">No asistió</button>` : '';
 
-                    let bordeColor = "border-white";
-                    let botonesOcultos = "";
-                    if (cita.estado === 'COMPLETADA') {
-                        bordeColor = "border-emerald-500 opacity-75";
-                        botonesOcultos = "hidden"; 
-                    } else if (cita.estado === 'CANCELADA') {
-                        bordeColor = "border-red-500 opacity-50";
-                        botonesOcultos = "hidden";
-                    }
-
-                    // Solo el Admin verá el nombre del barbero en azulito
-                    const etiquetaBarbero = rolUsuario === '1' && cita.nombre_barbero 
-                        ? `<p class="text-blue-400 text-sm font-semibold mt-1">💈 Barbero: ${cita.nombre_barbero}</p>` 
-                        : '';
-
-                    const tarjeta = `
-                        <div class="bg-zinc-800 p-4 rounded border-l-4 ${bordeColor} flex justify-between items-center transition">
-                            <div>
-                                <h3 class="text-lg font-bold text-white">${hora12} - ${cita.servicio}</h3>
-                                <p class="text-gray-400">Cliente: ${cita.nombre_invitado}</p>
-                                <p class="text-gray-500 text-sm">WhatsApp: ${cita.telefono_invitado}</p>
+                    return `
+                        <div class="bg-zinc-800 p-4 rounded border-l-4 ${estilo ? estilo.borde : 'border-white'} flex justify-between items-center gap-3 transition">
+                            <div class="min-w-0">
+                                <h3 class="text-lg font-bold text-white">${hora12(cita.hora_inicio)} - ${escaparHTML(cita.servicio)}</h3>
+                                <p class="text-gray-400">Cliente: ${escaparHTML(cita.nombre_invitado)}</p>
+                                <p class="text-gray-500 text-sm">WhatsApp: ${escaparHTML(cita.telefono_invitado)}</p>
                                 ${etiquetaBarbero}
-                                ${cita.estado === 'COMPLETADA' ? '<span class="text-emerald-400 text-xs font-bold mt-1 block">✓ Pagado</span>' : ''}
-                                ${cita.estado === 'CANCELADA' ? '<span class="text-red-400 text-xs font-bold mt-1 block">✗ Cancelada</span>' : ''}
+                                ${estilo ? estilo.etiqueta : ''}
                             </div>
-                            <div class="flex flex-col gap-2 ${botonesOcultos}">
-                                <button onclick="cambiarEstadoCita('${cita.id}', 'COMPLETADA')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 px-4 py-1.5 rounded text-sm hover:bg-emerald-600/40 transition font-medium">Cobrar</button>
-                                <button onclick="cambiarEstadoCita('${cita.id}', 'CANCELADA')" class="text-red-400 hover:text-red-300 transition text-sm">Cancelar</button>
-                            </div>
-                        </div>
-                    `;
-                    contenedor.innerHTML += tarjeta;
-                });
-
+                            ${abierta ? `
+                            <div class="flex flex-col gap-2 items-end shrink-0">
+                                <button onclick="cambiarEstadoCita('${cita.id}', 'COMPLETADA', this)" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 px-4 py-1.5 rounded text-sm hover:bg-emerald-600/40 transition font-medium">Cobrar</button>
+                                ${botonNoAsistio}
+                                <button onclick="cambiarEstadoCita('${cita.id}', 'CANCELADA', this)" class="text-red-400 hover:text-red-300 transition text-sm">Cancelar</button>
+                            </div>` : ''}
+                        </div>`;
+                }).join('');
             } catch (error) {
-                console.error("Error al cargar citas del dashboard:", error);
-                contenedor.innerHTML = '<p class="text-red-500">Hubo un error al cargar tus citas.</p>';
+                console.error(error);
+                contenedor.innerHTML = `<p class="text-red-500">No se pudieron cargar las citas: ${escaparHTML(error.message)}</p>`;
             }
         }
 
-        async function cambiarEstadoCita(idCita, nuevoEstado) {
-            if (nuevoEstado === 'CANCELADA') {
-                const confirmar = confirm("¿Seguro que deseas cancelar esta cita?");
-                if (!confirmar) return;
-            }
+        async function cambiarEstadoCita(idCita, nuevoEstado, btn) {
+            const confirmaciones = {
+                CANCELADA: ['¿Cancelar esta cita?', { detalle: 'El horario quedará libre para otro cliente.', textoConfirmar: 'Sí, cancelar cita', peligro: true }],
+                NO_ASISTIO: ['¿Marcar que el cliente no asistió?', { detalle: 'Ya pasaron los 10 minutos de tolerancia.', textoConfirmar: 'Sí, no asistió', peligro: true }]
+            };
+            if (confirmaciones[nuevoEstado] && !(await confirmar(...confirmaciones[nuevoEstado]))) return;
 
+            toggleCargando(btn, true);
             try {
                 const response = await fetch(`/api/citas/${idCita}/estado`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ estado: nuevoEstado })
                 });
-
                 if (response.ok) {
-                    cargarCitasDeHoy(); 
-                    cargarResumen(); 
+                    const textos = { COMPLETADA: 'Cita cobrada', CANCELADA: 'Cita cancelada', NO_ASISTIO: 'Marcada como "No asistió"' };
+                    mostrarToast(textos[nuevoEstado] || 'Cita actualizada', 'exito');
+                    cargarCitasDeHoy();
+                    cargarResumen();
                 } else {
-                    alert("Error al actualizar la cita.");
+                    mostrarToast(await leerError(response, 'Error al actualizar la cita.'), 'error');
+                    toggleCargando(btn, false);
                 }
             } catch (error) {
-                console.error("Error:", error);
+                mostrarToast('Error de conexión', 'error');
+                toggleCargando(btn, false);
             }
-        }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
         }
 
         cargarResumen();

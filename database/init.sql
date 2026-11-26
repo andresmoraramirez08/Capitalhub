@@ -39,12 +39,11 @@ CREATE TABLE usuarios (
 -- 2. PERSONAL OPERATIVO (BARBEROS) Y HORARIOS
 -- -----------------------------------------------------------------------------
 CREATE TABLE barberos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    usuario_id UUID UNIQUE NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    -- 0.65 para colaboradores; 1.00 si el barbero es el dueño del negocio
-    porcentaje_comision NUMERIC(5,2) DEFAULT 0.65 CHECK (porcentaje_comision >= 0.00 AND porcentaje_comision <= 1.00),
-    activo BOOLEAN DEFAULT TRUE,
-    creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre VARCHAR(100) NOT NULL,
+    telefono VARCHAR(20),
+    especialidad VARCHAR(100),
+    activo BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE horarios_barberos (
@@ -119,7 +118,7 @@ CREATE TABLE comisiones (
     cita_id UUID UNIQUE NOT NULL REFERENCES citas(id) ON DELETE RESTRICT,
     barbero_id UUID NOT NULL REFERENCES barberos(id) ON DELETE RESTRICT,
     monto_servicio NUMERIC(10,2) NOT NULL,
-    porcentaje_aplicado NUMERIC(5,2) NOT NULL, -- 0.65 o 1.00
+    porcentaje_aplicado NUMERIC(5,2) NOT NULL, -- Porcentaje entero (ej. 65 = 65%)
     monto_comision NUMERIC(10,2) NOT NULL,     -- Monto exacto calculado
     estado estado_pago_comision DEFAULT 'PENDIENTE',
     fecha_calculo TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -155,7 +154,7 @@ CREATE TABLE productos (
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TYPE tipo_metodo_pago AS ENUM ('PASARELA_ONLINE', 'EFECTIVO_LOCAL');
+CREATE TYPE tipo_metodo_pago AS ENUM ('PASARELA_ONLINE', 'EFECTIVO_LOCAL', 'TARJETA_LOCAL'); -- TARJETA_LOCAL: terminal en mostrador
 CREATE TYPE tipo_entrega_orden AS ENUM ('RECOGER_LOCAL', 'ENVIO_LOCAL_ESTATAL');
 CREATE TYPE estado_orden_venta AS ENUM ('PENDIENTE', 'PAGADA', 'EN_CAMINO', 'ENTREGADA', 'CANCELADA');
 

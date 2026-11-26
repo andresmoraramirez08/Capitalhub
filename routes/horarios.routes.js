@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { configurarHorario, obtenerHorario } = require('../controllers/horarios.controller');
-const { verificarToken } = require('../middlewares/auth.middleware');
+const { verificarToken, verificarRol } = require('../middlewares/auth.middleware');
 
-router.post('/', verificarToken, configurarHorario);
-router.get('/:barbero_id', verificarToken, obtenerHorario);
+router.post('/', verificarToken, verificarRol(['1']), configurarHorario);
+router.get('/:barbero_id', verificarToken, verificarRol(['1']), obtenerHorario);
 
-module.exports = router; // <-- Si falta esta línea, truena exactamente con ese error
+module.exports = router;

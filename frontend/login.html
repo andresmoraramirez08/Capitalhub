@@ -64,6 +64,8 @@
         </div>
 
         <!-- Formulario -->
+        <p id="login-error" class="hidden mb-4 text-sm text-red-300 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2"></p>
+
         <form id="loginForm" class="space-y-5">
             <div>
                 <label class="block text-sm font-medium mb-2 text-zinc-300">Correo Electrónico</label>
@@ -86,76 +88,56 @@
         </form>
     </div>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página se recargue
+        // Un solo manejador de login (antes había dos y competían entre sí)
+        const loginForm = document.getElementById('loginForm');
+        const mensajeError = document.getElementById('login-error');
+        const btnLogin = loginForm.querySelector('button[type="submit"]');
 
-            const email = document.getElementById('correo').value;
+        // Si llegamos aquí porque el token venció, lo avisamos
+        if (new URLSearchParams(window.location.search).get('sesion') === 'expirada') {
+            mensajeError.textContent = 'Tu sesión expiró. Vuelve a iniciar sesión.';
+            mensajeError.classList.remove('hidden');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            mensajeError.classList.add('hidden');
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Verificando...';
+
+            const email = document.getElementById('correo').value.trim();
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('http://localhost:3000/api/auth/login', {
+                // Ruta relativa: funciona en localhost y cuando se suba a un servidor
+                const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-
                 const data = await response.json();
 
                 if (response.ok) {
+                    localStorage.clear();
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('nombre', data.nombre);
+                    localStorage.setItem('nombre', data.nombre || '');
+                    localStorage.setItem('usuario_id', data.id || '');
+                    localStorage.setItem('rol', String(data.rol));
+                    if (data.barbero_id) localStorage.setItem('barbero_id', data.barbero_id);
                     window.location.href = 'dashboard.html';
-                } else {
-                    alert('Acceso denegado: ' + data.message);
+                    return;
                 }
+                mensajeError.textContent = data.message || 'Credenciales inválidas';
+                mensajeError.classList.remove('hidden');
             } catch (error) {
-                console.error('Error:', error);
-                alert('Fallo de conexión con el servidor.');
+                console.error('Error en el login:', error);
+                mensajeError.textContent = 'No se pudo conectar con el servidor.';
+                mensajeError.classList.remove('hidden');
             }
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Iniciar Sesión';
         });
     </script>
-
-    <script>
-    // Seleccionamos tu formulario exactamente como lo nombraste
-    const loginForm = document.getElementById('loginForm'); 
-
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evitamos que la página se recargue
-
-        // Extraemos el texto usando los IDs 'correo' y 'password'
-        const email = document.getElementById('correo').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            // Mandamos los datos a tu servidor
-            const response = await fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Si el login es correcto, guardamos su token y datos
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('usuario_id', data.id || data.user?.id);
-                localStorage.setItem('rol', data.rol || data.user?.rol);
-                
-                // Redirigimos al dashboard
-                window.location.href = 'dashboard.html'; 
-            } else {
-                // Si se equivocó de contraseña, le avisamos
-                alert(data.message || data.error || 'Credenciales inválidas');
-            }
-        } catch (error) {
-            console.error('Error en el login:', error);
-            alert('Hubo un error al conectar con el servidor.');
-        }
-    });
-</script>
 </body>
 
 </html>
