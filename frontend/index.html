@@ -57,6 +57,10 @@
             <div class="flex items-center gap-3 sm:gap-4">
                 <a href="login.html" class="hidden lg:inline-flex text-xs font-semibold text-neutral-500 hover:text-white transition">Soy Barbero / Admin</a>
                 <div data-zona-sesion class="hidden sm:flex items-center gap-4"></div>
+                <a href="carrito.html" data-boton-carrito class="hidden relative p-2 text-neutral-200 hover:text-white" aria-label="Ver carrito">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13L5.4 5M7 13l-2 5h13M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z" /></svg>
+                    <span data-contador-carrito class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-gold text-black text-[10px] font-extrabold flex items-center justify-center">0</span>
+                </a>
                 <a href="#agendar" class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-4 sm:px-5 py-2.5 rounded-lg text-sm transition shadow-lg shadow-brand-gold/25">Agendar Cita</a>
                 <button id="btn-menu-portal" type="button" class="md:hidden p-2 -mr-2 text-neutral-300 hover:text-white" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-portal">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -309,13 +313,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
-                    <span class="text-xs uppercase font-bold tracking-widest text-brand-gold">Productos</span>
+                    <span class="text-xs uppercase font-bold tracking-widest text-brand-gold">Tienda en Línea</span>
                     <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Catálogo de Productos</h2>
-                    <p class="text-xs text-brand-muted mt-1">Consulta lo que tenemos y pídelo en tu próxima visita.</p>
+                    <p class="text-xs text-brand-muted mt-1">Recoge en la barbería o recibe tu pedido en casa dentro de Durango.</p>
                 </div>
-                <div class="inline-flex items-center space-x-2 text-xs bg-brand-card px-3 py-2 rounded-lg border border-brand-border text-brand-muted self-start md:self-auto">
-                    <span>📦 Venta en sucursal</span>
-                    <strong class="text-white">Efectivo o tarjeta</strong>
+                <div class="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-xs bg-brand-card px-3 py-2 rounded-lg border border-brand-border text-brand-muted self-start md:self-auto max-w-full">
+                    <span>📦 Entrega:</span>
+                    <strong class="text-white">Recoger en local / Envío en Durango</strong>
                 </div>
             </div>
             <div id="lista-productos" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -340,6 +344,11 @@
             </div>
         </div>
     </section>
+
+    <!-- Botón flotante del carrito (celular) -->
+    <a href="carrito.html" data-boton-carrito class="hidden sm:hidden fixed bottom-4 inset-x-4 z-40 bg-brand-gold text-black font-bold py-3.5 rounded-xl shadow-2xl text-center text-sm">
+        Ver carrito (<span data-contador-carrito>0</span>) →
+    </a>
 
     <script src="portal.js"></script>
     <script src="inicio.js"></script>

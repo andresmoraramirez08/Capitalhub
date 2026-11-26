@@ -233,10 +233,12 @@
                             <div class="min-w-0">
                                 <p class="text-white">${v.items.map(i => `${i.cantidad}x ${escaparHTML(i.producto_nombre)}`).join(', ')}</p>
                                 <p class="text-xs text-zinc-500 mt-1">${formatearFechaHora(v.creado_en)} · ${escaparHTML(METODO_TEXTO[v.metodo_pago] || v.metodo_pago)} · ${escaparHTML(v.nombre_comprador)}</p>
+                                ${datosEntregaVenta(v)}
                                 <p class="text-xs mt-1 ${cancelada ? 'text-red-400' : 'text-zinc-400'}">${escaparHTML(v.estado)}</p>
                             </div>
                             <div class="flex flex-col items-end gap-1">
                                 <span class="${cancelada ? 'text-zinc-500 line-through' : 'text-emerald-400'} font-bold">${dinero(v.total)}</span>
+                                ${botonSiguienteEstado(v)}
                                 ${!cancelada ? `<button onclick="cancelarVenta('${v.id}', this)" class="text-red-400 text-xs hover:text-red-300">Cancelar</button>` : ''}
                             </div>
                         </div>`;
@@ -365,6 +367,41 @@
                 const res = await fetch(`/api/catalogo/productos/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ activo: val }) });
                 if (res.ok) { mostrarToast(val ? 'Producto activado' : 'Producto desactivado', 'exito'); cargarProductos(); return; }
                 mostrarToast(await leerError(res, 'No se pudo cambiar el estado'), 'error');
+            } catch (err) { mostrarToast('Error de conexión', 'error'); }
+            toggleCargando(btn, false);
+        }
+
+        // ---------- Pedidos de la tienda en línea: entrega y avance de estado ----------
+        function datosEntregaVenta(v) {
+            if (v.tipo_entrega === 'ENVIO_LOCAL_ESTATAL') {
+                const dir = [v.direccion_calle, v.colonia, v.municipio_ciudad, v.codigo_postal ? 'CP ' + v.codigo_postal : ''].filter(Boolean).join(', ');
+                return `<p class="text-xs text-amber-300 mt-1">📦 Envío a: ${escaparHTML(dir)}${v.referencias_domicilio ? ' (' + escaparHTML(v.referencias_domicilio) + ')' : ''} · Tel. ${escaparHTML(v.telefono_comprador)}</p>`;
+            }
+            if (v.estado === 'PENDIENTE' || v.metodo_pago === 'PASARELA_ONLINE') {
+                return `<p class="text-xs text-zinc-400 mt-1">🏪 Recoge en el local · Tel. ${escaparHTML(v.telefono_comprador)}</p>`;
+            }
+            return '';
+        }
+
+        // Siguiente paso de un pedido: efectivo al recoger -> Entregada; pagado con envío -> En camino -> Entregada
+        function siguienteEstado(v) {
+            if (v.estado === 'PENDIENTE' && v.metodo_pago !== 'PASARELA_ONLINE') return { estado: 'ENTREGADA', texto: 'Cobrado y entregado' };
+            if (v.estado === 'PAGADA' && v.tipo_entrega === 'ENVIO_LOCAL_ESTATAL') return { estado: 'EN_CAMINO', texto: 'Marcar en camino' };
+            if (v.estado === 'PAGADA' || v.estado === 'EN_CAMINO') return { estado: 'ENTREGADA', texto: 'Marcar entregado' };
+            return null;
+        }
+
+        function botonSiguienteEstado(v) {
+            const sig = siguienteEstado(v);
+            return sig ? `<button onclick="avanzarVenta('${v.id}', '${sig.estado}', this)" class="text-sky-400 text-xs hover:text-sky-300">${sig.texto}</button>` : '';
+        }
+
+        async function avanzarVenta(id, estado, btn) {
+            toggleCargando(btn, true);
+            try {
+                const res = await fetch(`/api/catalogo/ventas/${id}/estado`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ estado }) });
+                if (res.ok) { mostrarToast('Pedido actualizado', 'exito'); cargarVentas(); return; }
+                mostrarToast(await leerError(res, 'No se pudo actualizar el pedido'), 'error');
             } catch (err) { mostrarToast('Error de conexión', 'error'); }
             toggleCargando(btn, false);
         }

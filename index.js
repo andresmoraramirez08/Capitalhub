@@ -27,6 +27,8 @@ app.use('/api/clientes', require('./routes/clientes.routes'));
 app.use('/api/catalogo', require('./routes/catalogo.routes'));
 app.use('/api/comisiones', require('./routes/comisiones.routes'));
 app.use('/api/portal', require('./routes/portal.routes')); // portal del cliente (página pública)
+app.use('/api/tienda', require('./routes/tienda.routes'));  // tienda en línea con Mercado Pago
+require('./controllers/tienda.controller').iniciarTareasTienda(); // cancela pagos en línea vencidos
 
 // Configuración de la conexión a PostgreSQL
 const pool = require('./config/db');

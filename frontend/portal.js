@@ -135,6 +135,64 @@ const ESTADOS_CITA = {
 };
 
 // -----------------------------------------------------------------------------
+// Carrito de la tienda (se guarda en este navegador: [{ producto_id, cantidad }])
+// -----------------------------------------------------------------------------
+const CLAVE_CARRITO = 'ch_carrito';
+const MAX_PIEZAS = 10;
+
+function leerCarrito() {
+    try {
+        const c = JSON.parse(localStorage.getItem(CLAVE_CARRITO) || '[]');
+        return Array.isArray(c) ? c.filter(i => Number(i.producto_id) > 0 && Number(i.cantidad) > 0) : [];
+    } catch (e) { return []; }
+}
+
+function guardarCarrito(items) {
+    try { localStorage.setItem(CLAVE_CARRITO, JSON.stringify(items)); } catch (e) { }
+    pintarContadorCarrito();
+}
+
+function cambiarCantidadCarrito(productoId, cantidad) {
+    const items = leerCarrito().filter(i => Number(i.producto_id) !== Number(productoId));
+    const cant = Math.min(MAX_PIEZAS, Math.max(0, Number(cantidad) || 0));
+    if (cant > 0) items.push({ producto_id: Number(productoId), cantidad: cant });
+    guardarCarrito(items);
+}
+
+function agregarAlCarrito(productoId, cantidad = 1) {
+    const actual = leerCarrito().find(i => Number(i.producto_id) === Number(productoId));
+    const nueva = (actual ? Number(actual.cantidad) : 0) + cantidad;
+    if (nueva > MAX_PIEZAS) {
+        mostrarToast(`Máximo ${MAX_PIEZAS} piezas por producto en línea.`, 'aviso');
+        return false;
+    }
+    cambiarCantidadCarrito(productoId, nueva);
+    return true;
+}
+
+const piezasEnCarrito = () => leerCarrito().reduce((s, i) => s + Number(i.cantidad), 0);
+
+function vaciarCarrito() { guardarCarrito([]); }
+
+/** Actualiza el numerito del carrito en todos los elementos [data-contador-carrito] */
+function pintarContadorCarrito() {
+    const n = piezasEnCarrito();
+    document.querySelectorAll('[data-contador-carrito]').forEach(el => {
+        el.textContent = n;
+        el.classList.toggle('hidden', n === 0);
+    });
+    document.querySelectorAll('[data-boton-carrito]').forEach(el => el.classList.toggle('hidden', n === 0));
+}
+
+const ESTADOS_PEDIDO = {
+    PENDIENTE: { texto: 'Pendiente', clase: 'bg-amber-500/10 text-amber-300 border-amber-500/30' },
+    PAGADA: { texto: 'Pagado', clase: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' },
+    EN_CAMINO: { texto: 'En camino', clase: 'bg-sky-500/10 text-sky-300 border-sky-500/30' },
+    ENTREGADA: { texto: 'Entregado', clase: 'bg-sky-500/10 text-sky-300 border-sky-500/30' },
+    CANCELADA: { texto: 'Cancelado', clase: 'bg-red-500/10 text-red-300 border-red-500/30' }
+};
+
+// -----------------------------------------------------------------------------
 // Avisos flotantes y ventana de confirmación
 // -----------------------------------------------------------------------------
 function mostrarToast(mensaje, tipo = 'exito') {
@@ -230,6 +288,7 @@ function activarMenuMovil() {
 document.addEventListener('DOMContentLoaded', () => {
     pintarZonaSesion();
     activarMenuMovil();
+    pintarContadorCarrito();
     const anio = document.getElementById('anio-actual');
     if (anio) anio.textContent = new Date().getFullYear();
 });

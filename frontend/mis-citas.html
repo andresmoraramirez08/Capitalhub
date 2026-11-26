@@ -77,6 +77,11 @@
             </div>
         </section>
 
+        <section aria-labelledby="titulo-pedidos" class="mt-10">
+            <h2 id="titulo-pedidos" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Mis pedidos de la tienda</h2>
+            <div id="lista-pedidos" class="space-y-2"><p class="text-sm text-brand-muted">Cargando…</p></div>
+        </section>
+
         <section aria-labelledby="titulo-historial" class="mt-10">
             <h2 id="titulo-historial" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Historial</h2>
             <div id="lista-historial" class="space-y-2"></div>
@@ -141,6 +146,22 @@
             $('datos-cliente').textContent = [c.email, c.telefono].filter(Boolean).join(' · ');
             CITAS = r.data.citas || [];
             pintar();
+            cargarPedidos();
+        }
+
+        async function cargarPedidos() {
+            const r = await apiPortal('GET', '/api/tienda/mis-pedidos', null, { conSesion: true });
+            if (!r.ok) { $('lista-pedidos').innerHTML = `<p class="text-sm text-brand-muted">${escaparHTML(mensajeDe(r, 'No se pudieron cargar tus pedidos.'))}</p>`; return; }
+            $('lista-pedidos').innerHTML = r.data.map(p => {
+                const e = ESTADOS_PEDIDO[p.estado] || { texto: p.estado, clase: 'border-brand-border text-neutral-300' };
+                return `<a href="pedido.html?id=${encodeURIComponent(p.id)}" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 rounded-lg bg-brand-card border border-brand-border text-sm hover:border-neutral-500 transition">
+                    <div class="min-w-0">
+                        <p class="text-neutral-200">#${escaparHTML(p.folio)} · ${escaparHTML(p.items.map(i => `${i.cantidad}× ${i.nombre}`).join(', '))}</p>
+                        <p class="text-xs text-brand-muted">${escaparHTML(capitalizar(new Date(p.creado_en).toLocaleDateString('es-MX', { dateStyle: 'long' })))} · ${dinero(p.total)}</p>
+                    </div>
+                    <span class="text-[11px] font-semibold border px-2 py-0.5 rounded-full ${e.clase}">${escaparHTML(e.texto)}</span>
+                </a>`;
+            }).join('') || '<p class="text-sm text-brand-muted">Aún no tienes pedidos. <a href="index.html#tienda" class="underline">Ver productos</a></p>';
         }
 
         function etiquetaEstado(estado) {

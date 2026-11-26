@@ -8,6 +8,7 @@
 const pool = require('../config/db');
 const { validarHorarioCita, calcularHorariosLibres } = require('./citas.controller');
 const { buscarOCrearCliente, ROL_CLIENTE } = require('./clientes.controller');
+const { enviarCorreo, correoCita } = require('../config/correo');
 const {
     AVISO_PRIVACIDAD_VERSION, HORAS_MIN_RESERVA, HORAS_MIN_CANCELACION,
     REGEX_FECHA, REGEX_HORA, REGEX_UUID,
@@ -16,6 +17,21 @@ const {
 
 const TELEFONO_BARBERIA = '618-310-0009';
 const ESTADOS_ACTIVOS = ['PENDIENTE', 'CONFIRMADA'];
+
+/** RF-AG-06: avisa por correo (sin esperar la respuesta, para no hacer lenta la página) */
+const avisarCita = (tipo, citaId) => {
+    pool.query(
+        `SELECT c.email_invitado, c.nombre_invitado, to_char(c.fecha_cita, 'YYYY-MM-DD') AS fecha_cita,
+                to_char(c.hora_inicio, 'HH24:MI') AS hora_inicio, s.nombre AS servicio, s.precio, b.nombre AS barbero
+         FROM citas c JOIN servicios s ON s.id = c.servicio_id JOIN barberos b ON b.id = c.barbero_id
+         WHERE c.id = $1`, [citaId]
+    ).then(r => {
+        const c = r.rows[0];
+        if (!c || !c.email_invitado) return;
+        const { asunto, html } = correoCita(tipo, c, String(c.nombre_invitado || '').split(' ')[0]);
+        return enviarCorreo({ para: c.email_invitado, nombre: c.nombre_invitado, asunto, html });
+    }).catch(e => console.error('Portal - correo de cita:', e.message));
+};
 
 const esCliente = (req) => req.user && Number(req.user.rol_id || req.user.rol) === ROL_CLIENTE;
 const idServicioValido = (v) => Number.isInteger(Number(v)) && Number(v) > 0;
@@ -220,6 +236,7 @@ const agendarCita = async (req, res) => {
 
         const cita = await pool.query(`${SELECT_CITA_CLIENTE} WHERE c.id = $1`, [ins.rows[0].id]);
         res.status(201).json({ message: 'Tu cita quedó agendada.', cita: cita.rows[0] });
+        avisarCita('confirmada', ins.rows[0].id);
     } catch (error) {
         await client.query('ROLLBACK').catch(() => {});
         console.error('Portal - error al agendar cita:', error);
@@ -281,6 +298,7 @@ const cancelarMiCita = async (req, res) => {
             return res.status(motivo ? motivo.status : 400).json({ message: motivo ? motivo.message : 'No se pudo cancelar la cita.' });
         }
         res.json({ message: 'Tu cita fue cancelada.' });
+        avisarCita('cancelada', id);
     } catch (error) {
         console.error('Portal - error al cancelar cita:', error);
         res.status(500).json({ message: 'Error interno al cancelar la cita.' });
@@ -338,6 +356,7 @@ const reprogramarMiCita = async (req, res) => {
 
         const nueva = await pool.query(`${SELECT_CITA_CLIENTE} WHERE c.id = $1`, [id]);
         res.json({ message: 'Tu cita fue reprogramada.', cita: nueva.rows[0] });
+        avisarCita('reprogramada', id);
     } catch (error) {
         await client.query('ROLLBACK').catch(() => {});
         console.error('Portal - error al reprogramar cita:', error);

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito | Capital Barbería</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-gold selection:text-black">
+    <header class="sticky top-0 z-40 border-b border-brand-border bg-black/90 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-lg">C</div>
+                <span class="hidden sm:inline text-lg font-bold tracking-tight text-white">CAPITAL <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span></span>
+            </a>
+            <div class="flex items-center gap-4">
+                <div data-zona-sesion class="flex items-center gap-4"></div>
+                <a href="index.html#tienda" class="text-sm font-semibold text-neutral-300 hover:text-white">← Seguir comprando</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Tu carrito</h1>
+
+        <div id="carrito-vacio" class="hidden mt-8 text-center p-10 rounded-xl border border-dashed border-brand-border">
+            <p class="text-brand-muted">Tu carrito está vacío.</p>
+            <a href="index.html#tienda" class="inline-block mt-4 bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-5 py-2.5 rounded-lg text-sm transition">Ver productos</a>
+        </div>
+
+        <div id="carrito-lleno" class="hidden mt-6 grid lg:grid-cols-5 gap-6">
+            <!-- Columna izquierda: productos, entrega, datos -->
+            <div class="lg:col-span-3 space-y-6">
+                <section class="bg-brand-card border border-brand-border rounded-2xl p-5" aria-labelledby="t-productos">
+                    <h2 id="t-productos" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Productos</h2>
+                    <div id="lista-carrito" class="divide-y divide-brand-border"></div>
+                </section>
+
+                <section class="bg-brand-card border border-brand-border rounded-2xl p-5" aria-labelledby="t-entrega">
+                    <h2 id="t-entrega" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Entrega</h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <label class="flex items-start gap-3 p-4 rounded-xl border border-brand-border bg-brand-dark cursor-pointer" data-opcion>
+                            <input type="radio" name="entrega" value="RECOGER_LOCAL" checked class="mt-1 accent-neutral-300">
+                            <span><span class="block text-sm font-bold text-white">Recoger en la barbería</span><span class="block text-xs text-brand-muted">Sin costo · Prol. Pino Suárez 2910</span></span>
+                        </label>
+                        <label class="flex items-start gap-3 p-4 rounded-xl border border-brand-border bg-brand-dark cursor-pointer" data-opcion>
+                            <input type="radio" name="entrega" value="ENVIO_LOCAL_ESTATAL" class="mt-1 accent-neutral-300">
+                            <span><span class="block text-sm font-bold text-white">Envío dentro de Durango</span><span class="block text-xs text-brand-muted">Costo: <span id="costo-envio-texto">—</span> · pago en línea</span></span>
+                        </label>
+                    </div>
+                    <div id="campos-envio" class="hidden mt-4 grid sm:grid-cols-2 gap-3">
+                        <div class="sm:col-span-2">
+                            <label for="env-calle" class="block text-xs font-semibold text-brand-muted mb-1">Calle y número</label>
+                            <input id="env-calle" type="text" autocomplete="street-address" maxlength="200" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                        </div>
+                        <div>
+                            <label for="env-colonia" class="block text-xs font-semibold text-brand-muted mb-1">Colonia</label>
+                            <input id="env-colonia" type="text" maxlength="150" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                        </div>
+                        <div>
+                            <label for="env-cp" class="block text-xs font-semibold text-brand-muted mb-1">Código postal</label>
+                            <input id="env-cp" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="34000" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                        </div>
+                        <div>
+                            <label for="env-municipio" class="block text-xs font-semibold text-brand-muted mb-1">Municipio</label>
+                            <input id="env-municipio" type="text" maxlength="100" value="Durango" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                        </div>
+                        <div>
+                            <label for="env-referencias" class="block text-xs font-semibold text-brand-muted mb-1">Referencias (opcional)</label>
+                            <input id="env-referencias" type="text" maxlength="255" placeholder="Casa blanca, portón negro" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-brand-card border border-brand-border rounded-2xl p-5" aria-labelledby="t-pago">
+                    <h2 id="t-pago" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Pago</h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <label id="opcion-efectivo" class="flex items-start gap-3 p-4 rounded-xl border border-brand-border bg-brand-dark cursor-pointer" data-opcion>
+                            <input type="radio" name="pago" value="EFECTIVO_LOCAL" checked class="mt-1 accent-neutral-300">
+                            <span><span class="block text-sm font-bold text-white">Efectivo al recoger</span><span class="block text-xs text-brand-muted">Pagas en la barbería</span></span>
+                        </label>
+                        <label id="opcion-mp" class="flex items-start gap-3 p-4 rounded-xl border border-brand-border bg-brand-dark cursor-pointer" data-opcion>
+                            <input type="radio" name="pago" value="PASARELA_ONLINE" class="mt-1 accent-neutral-300">
+                            <span><span class="block text-sm font-bold text-white">Tarjeta con Mercado Pago</span><span class="block text-xs text-brand-muted">Pago seguro; tus datos de tarjeta no pasan por nosotros</span></span>
+                        </label>
+                    </div>
+                    <p id="aviso-sin-mp" class="hidden mt-3 text-xs text-amber-200">El pago en línea no está disponible por ahora; solo puedes recoger y pagar en el local.</p>
+                </section>
+
+                <section class="bg-brand-card border border-brand-border rounded-2xl p-5" aria-labelledby="t-datos">
+                    <h2 id="t-datos" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Tus datos</h2>
+                    <div id="datos-cuenta" class="hidden text-sm text-neutral-300">
+                        Compras con tu cuenta: <strong id="nombre-cuenta" class="text-white"></strong>. Usaremos tu teléfono y correo registrados.
+                    </div>
+                    <form id="form-comprador" class="space-y-3" novalidate>
+                        <p class="text-xs text-brand-muted">¿Tienes cuenta? <a href="cuenta.html" class="underline text-neutral-200">Inicia sesión</a> para ver tus pedidos después.</p>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="c-nombre" class="block text-xs font-semibold text-brand-muted mb-1">Nombre(s)</label>
+                                <input id="c-nombre" type="text" autocomplete="given-name" maxlength="60" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                            </div>
+                            <div>
+                                <label for="c-apellidos" class="block text-xs font-semibold text-brand-muted mb-1">Apellidos</label>
+                                <input id="c-apellidos" type="text" autocomplete="family-name" maxlength="60" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                            </div>
+                            <div>
+                                <label for="c-telefono" class="block text-xs font-semibold text-brand-muted mb-1">Teléfono (10 dígitos)</label>
+                                <input id="c-telefono" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                            </div>
+                            <div>
+                                <label for="c-email" class="block text-xs font-semibold text-brand-muted mb-1">Correo electrónico</label>
+                                <input id="c-email" type="email" autocomplete="email" maxlength="150" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                            </div>
+                        </div>
+                        <div class="hidden" aria-hidden="true"><label for="c-sitio">No llenar</label><input id="c-sitio" type="text" tabindex="-1" autocomplete="off"></div>
+                        <label class="flex items-start gap-3 text-xs text-neutral-300">
+                            <input id="c-aviso" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-brand-border bg-black">
+                            <span>Acepto el <a href="aviso-privacidad.html" target="_blank" rel="noopener" class="underline text-white">aviso de privacidad</a> y el uso de mis datos para procesar mi pedido.</span>
+                        </label>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Columna derecha: resumen -->
+            <aside class="lg:col-span-2">
+                <div class="lg:sticky lg:top-24 bg-brand-card border border-brand-border rounded-2xl p-5">
+                    <h2 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resumen</h2>
+                    <dl class="space-y-2 text-sm">
+                        <div class="flex justify-between"><dt class="text-brand-muted">Productos</dt><dd id="r-subtotal" class="text-white">$0</dd></div>
+                        <div class="flex justify-between"><dt class="text-brand-muted">Envío</dt><dd id="r-envio" class="text-white">$0</dd></div>
+                        <div class="flex justify-between pt-3 border-t border-brand-border text-base"><dt class="font-bold text-white">Total</dt><dd id="r-total" class="font-extrabold text-brand-gold">$0</dd></div>
+                    </dl>
+                    <button type="button" id="btn-confirmar" class="mt-6 w-full bg-brand-gold hover:bg-brand-goldHover text-black font-bold py-3.5 rounded-xl transition">Confirmar pedido</button>
+                    <p id="nota-pago" class="text-[11px] text-brand-muted mt-3 text-center"></p>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="text-center text-[11px] text-brand-muted py-6 border-t border-brand-border">
+        <a href="aviso-privacidad.html" class="underline hover:text-white">Aviso de privacidad</a> · Capital Barbería · Tel. 618-310-0009
+    </footer>
+
+    <script src="portal.js"></script>
+    <script src="carrito.js"></script>
+</body>
+
+</html>

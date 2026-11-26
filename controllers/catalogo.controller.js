@@ -323,8 +323,15 @@ const listarVentas = async (req, res) => {
                 v.metodo_pago,
                 v.estado,
                 v.subtotal,
+                v.costo_envio,
                 v.total,
                 v.creado_en,
+                v.municipio_ciudad,
+                v.codigo_postal,
+                v.direccion_calle,
+                v.colonia,
+                v.referencias_domicilio,
+                v.pasarela_referencia_id,
                 COALESCE(
                     json_agg(
                         json_build_object(

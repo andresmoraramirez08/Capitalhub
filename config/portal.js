@@ -10,6 +10,11 @@ const AVISO_PRIVACIDAD_VERSION = '2026-11-26';
 const HORAS_MIN_RESERVA = 24;      // RF-AG-02: reservar con al menos 24 h de anticipación
 const HORAS_MIN_CANCELACION = 5;   // RF-AG-03: cancelar o reprogramar con al menos 5 h
 
+// Tienda en línea
+const COSTO_ENVIO_DURANGO = 80;   // PRUEBA: confirmar con la barbería el costo real del envío
+const MINUTOS_PARA_PAGAR = 30;    // si el pago en línea no se completa, el pedido se cancela y el stock regresa
+const MAX_PIEZAS_POR_PRODUCTO = 10;
+
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const REGEX_FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const REGEX_HORA = /^\d{2}:\d{2}$/;
@@ -46,6 +51,9 @@ module.exports = {
     AVISO_PRIVACIDAD_VERSION,
     HORAS_MIN_RESERVA,
     HORAS_MIN_CANCELACION,
+    COSTO_ENVIO_DURANGO,
+    MINUTOS_PARA_PAGAR,
+    MAX_PIEZAS_POR_PRODUCTO,
     REGEX_FECHA,
     REGEX_HORA,
     REGEX_UUID,

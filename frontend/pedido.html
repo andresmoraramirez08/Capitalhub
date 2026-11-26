@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi pedido | Capital Barbería</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen flex flex-col">
+    <header class="border-b border-brand-border bg-black/90">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-lg">C</div>
+                <span class="text-lg font-bold tracking-tight text-white">CAPITAL <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span></span>
+            </a>
+            <a href="index.html#tienda" class="text-sm font-semibold text-neutral-300 hover:text-white">Tienda</a>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 sm:px-6 py-10">
+        <div id="cargando" class="text-center text-brand-muted text-sm">Consultando tu pedido…</div>
+        <div id="pedido" class="hidden bg-brand-card border border-brand-border rounded-2xl p-6">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-widest text-brand-gold">Pedido</p>
+                    <h1 class="text-2xl font-extrabold text-white mt-1">#<span id="folio"></span></h1>
+                    <p id="fecha" class="text-xs text-brand-muted mt-1"></p>
+                </div>
+                <span id="estado"></span>
+            </div>
+            <p id="mensaje" class="mt-5 text-sm text-neutral-200"></p>
+            <div id="items" class="mt-5 divide-y divide-brand-border border-y border-brand-border text-sm"></div>
+            <dl class="mt-4 space-y-1 text-sm">
+                <div class="flex justify-between"><dt class="text-brand-muted">Productos</dt><dd id="subtotal"></dd></div>
+                <div class="flex justify-between"><dt class="text-brand-muted">Envío</dt><dd id="envio"></dd></div>
+                <div class="flex justify-between text-base pt-2"><dt class="font-bold text-white">Total</dt><dd id="total" class="font-extrabold text-brand-gold"></dd></div>
+            </dl>
+            <div id="acciones-pago" class="hidden mt-6 flex flex-col gap-3">
+                <button type="button" id="btn-pagar" class="w-full bg-brand-gold hover:bg-brand-goldHover text-black font-bold py-3 rounded-xl transition">Pagar con Mercado Pago</button>
+                <button type="button" id="btn-revisar" class="w-full border border-brand-border text-white font-semibold py-3 rounded-xl hover:bg-brand-cardElevated transition">Ya pagué, actualizar</button>
+            </div>
+            <p class="mt-6 text-xs text-brand-muted">Guarda esta página para consultar tu pedido. ¿Dudas? Llámanos al <a href="tel:6183100009" class="underline">618-310-0009</a>.</p>
+        </div>
+        <div class="text-center mt-6">
+            <a id="link-mis" href="mis-citas.html" class="hidden text-sm underline text-neutral-300">Ver todos mis pedidos</a>
+        </div>
+    </main>
+
+    <script src="portal.js"></script>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const id = new URLSearchParams(location.search).get('id') || '';
+        let revisiones = 0;
+
+        const MENSAJES = {
+            PENDIENTE_EFECTIVO: 'Apartamos tus productos. Pasa a recogerlos a la barbería (Prol. Pino Suárez 2910) y paga en efectivo.',
+            PENDIENTE_LINEA: 'Estamos esperando la confirmación de tu pago. Si ya pagaste, en unos segundos se actualiza.',
+            PENDIENTE_VENCIDO: 'El tiempo para pagar terminó. Si ya pagaste, toca "Ya pagué, actualizar".',
+            PAGADA_RECOGER: '¡Pago recibido! Ya puedes pasar a recoger tu pedido a la barbería.',
+            PAGADA_ENVIO: '¡Pago recibido! Preparamos tu envío dentro de Durango.',
+            EN_CAMINO: 'Tu pedido va en camino.',
+            ENTREGADA: 'Pedido entregado. ¡Gracias por tu compra!',
+            CANCELADA: 'Este pedido fue cancelado.'
+        };
+
+        function mensaje(p) {
+            if (p.estado === 'PENDIENTE') {
+                if (p.metodo_pago !== 'PASARELA_ONLINE') return MENSAJES.PENDIENTE_EFECTIVO;
+                return p.puede_pagar ? MENSAJES.PENDIENTE_LINEA : MENSAJES.PENDIENTE_VENCIDO;
+            }
+            if (p.estado === 'PAGADA') return p.tipo_entrega === 'RECOGER_LOCAL' ? MENSAJES.PAGADA_RECOGER : MENSAJES.PAGADA_ENVIO;
+            return MENSAJES[p.estado] || '';
+        }
+
+        async function cargar() {
+            const r = await apiPortal('GET', `/api/tienda/pedidos/${encodeURIComponent(id)}`);
+            $('cargando').classList.toggle('hidden', r.ok);
+            if (!r.ok) { $('cargando').textContent = mensajeDe(r, 'No encontramos el pedido.'); return; }
+            const p = r.data;
+            $('pedido').classList.remove('hidden');
+            $('folio').textContent = p.folio;
+            $('fecha').textContent = capitalizar(new Date(p.creado_en).toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'short' }));
+            const e = ESTADOS_PEDIDO[p.estado] || { texto: p.estado, clase: '' };
+            $('estado').className = `text-[11px] font-semibold border px-2 py-0.5 rounded-full ${e.clase}`;
+            $('estado').textContent = e.texto;
+            $('mensaje').textContent = mensaje(p);
+            $('items').innerHTML = p.items.map(i => `<div class="py-2 flex justify-between gap-3"><span>${Number(i.cantidad)} × ${escaparHTML(i.nombre)}</span><span>${dinero(i.cantidad * i.precio_unitario)}</span></div>`).join('');
+            $('subtotal').textContent = dinero(p.subtotal);
+            $('envio').textContent = p.costo_envio ? dinero(p.costo_envio) : (p.tipo_entrega === 'RECOGER_LOCAL' ? 'Recoger en local' : 'Gratis');
+            $('total').textContent = `${dinero(p.total)} MXN`;
+            const pendienteEnLinea = p.estado === 'PENDIENTE' && p.metodo_pago === 'PASARELA_ONLINE';
+            $('acciones-pago').classList.toggle('hidden', !pendienteEnLinea);
+            $('btn-pagar').classList.toggle('hidden', !p.puede_pagar);
+            if (sesionCliente()) $('link-mis').classList.remove('hidden');
+            // Mientras esperamos el pago, revisamos solo unas veces
+            if (pendienteEnLinea && p.puede_pagar && revisiones < 12) { revisiones++; setTimeout(cargar, 5000); }
+        }
+
+        $('btn-revisar').addEventListener('click', async () => {
+            botonCargando($('btn-revisar'), true, 'Revisando...');
+            await cargar();
+            botonCargando($('btn-revisar'), false);
+        });
+        $('btn-pagar').addEventListener('click', async () => {
+            botonCargando($('btn-pagar'), true, 'Abriendo Mercado Pago...');
+            const r = await apiPortal('POST', `/api/tienda/pedidos/${encodeURIComponent(id)}/pagar`);
+            if (r.ok && r.data.url_pago) { location.href = r.data.url_pago; return; }
+            botonCargando($('btn-pagar'), false);
+            mostrarToast(mensajeDe(r, 'No se pudo abrir el pago.'), 'error');
+            cargar();
+        });
+
+        cargar();
+    </script>
+</body>
+
+</html>

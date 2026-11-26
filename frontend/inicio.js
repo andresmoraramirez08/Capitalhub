@@ -98,7 +98,7 @@ async function cargarProductos() {
             <div class="mt-4 pt-3 border-t border-brand-border flex flex-wrap items-center justify-between gap-2">
                 <span class="text-white font-bold text-sm">${dinero(p.precio)} MXN</span>
                 ${p.disponible
-                    ? '<span class="text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">Disponible</span>'
+                    ? `<button type="button" data-agregar-producto="${Number(p.id)}" class="bg-brand-gold/10 hover:bg-brand-gold text-brand-gold hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-brand-gold/30">Agregar</button>`
                     : '<span class="text-[10px] font-semibold text-neutral-400 bg-zinc-500/10 border border-zinc-600 px-2 py-0.5 rounded-full">Agotado</span>'}
             </div>
         </div>`;
@@ -372,6 +372,14 @@ document.addEventListener('change', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+    const bProd = e.target.closest('[data-agregar-producto]');
+    if (bProd) {
+        if (agregarAlCarrito(Number(bProd.dataset.agregarProducto))) {
+            mostrarToast('Agregado al carrito. Toca el carrito para terminar tu compra.');
+        }
+        return;
+    }
+
     const bServ = e.target.closest('[data-agendar-servicio]');
     if (bServ) { elegirServicio(Number(bServ.dataset.agendarServicio)); irPaso(2); irAAgendar(); return; }
 
