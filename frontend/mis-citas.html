@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis citas | Capital Barbería</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-gold selection:text-black">
+    <script>
+        // Solo clientes con sesión (rol 3); el resto va a su lugar antes de pintar nada
+        (function () {
+            let rol = null, token = null;
+            try { token = localStorage.getItem('token'); rol = localStorage.getItem('rol'); } catch (e) { }
+            if (!token) location.replace('cuenta.html');
+            else if (rol !== '3') location.replace('dashboard.html');
+        })();
+    </script>
+
+    <header class="sticky top-0 z-40 border-b border-brand-border bg-black/90 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-lg">C</div>
+                <span class="hidden sm:inline text-lg font-bold tracking-tight text-white">CAPITAL <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span></span>
+            </a>
+            <div class="flex items-center gap-3 sm:gap-4">
+                <a href="index.html#agendar" class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-4 py-2 rounded-lg text-sm transition">Nueva cita</a>
+                <button type="button" onclick="cerrarSesionPortal()" class="text-sm font-semibold text-neutral-400 hover:text-white">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+            <div>
+                <p class="text-xs uppercase font-bold tracking-widest text-brand-gold">Mi cuenta</p>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Hola, <span id="nombre-cliente"></span></h1>
+                <p id="datos-cliente" class="text-xs text-brand-muted mt-1"></p>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl border border-brand-border bg-brand-card text-xs text-neutral-300 mb-8">
+            Puedes <strong class="text-white">cancelar o reprogramar</strong> hasta <strong class="text-white">5 horas antes</strong> de tu cita. Con menos tiempo, llámanos al <a href="tel:6183100009" class="underline">618-310-0009</a>. Hay 10 minutos de tolerancia.
+        </div>
+
+        <section aria-labelledby="titulo-proximas">
+            <h2 id="titulo-proximas" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Próximas citas</h2>
+            <div id="lista-proximas" class="grid md:grid-cols-2 gap-4">
+                <p class="text-sm text-brand-muted">Cargando…</p>
+            </div>
+        </section>
+
+        <section aria-labelledby="titulo-historial" class="mt-10">
+            <h2 id="titulo-historial" class="text-sm font-bold text-white uppercase tracking-wider mb-3">Historial</h2>
+            <div id="lista-historial" class="space-y-2"></div>
+        </section>
+    </main>
+
+    <!-- Ventana para reprogramar -->
+    <div id="modal-reprogramar" class="hidden fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div role="dialog" aria-modal="true" aria-labelledby="titulo-reprogramar" class="bg-brand-card border border-brand-border rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h3 id="titulo-reprogramar" class="text-lg font-bold text-white">Reprogramar cita</h3>
+                    <p id="rep-servicio" class="text-xs text-brand-muted mt-1"></p>
+                </div>
+                <button type="button" id="rep-cerrar" class="text-neutral-400 hover:text-white text-2xl leading-none" aria-label="Cerrar">×</button>
+            </div>
+            <div class="mt-5">
+                <label for="rep-barbero" class="block text-xs font-semibold text-brand-muted mb-1">Barbero</label>
+                <select id="rep-barbero" class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold"></select>
+            </div>
+            <div class="mt-4">
+                <p class="text-xs font-semibold text-brand-muted mb-2">Nuevo día</p>
+                <div id="rep-dias" class="flex gap-2 overflow-x-auto pb-2"></div>
+            </div>
+            <div class="mt-4">
+                <p id="rep-titulo-horas" class="text-xs font-semibold text-brand-muted mb-2">Elige un día.</p>
+                <div id="rep-horas" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+            </div>
+            <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                <button type="button" id="rep-cancelar" class="px-4 py-2.5 rounded-lg border border-brand-border text-neutral-300 hover:bg-brand-cardElevated transition">Volver</button>
+                <button type="button" id="rep-guardar" disabled class="px-4 py-2.5 rounded-lg font-bold bg-brand-gold hover:bg-brand-goldHover text-black transition disabled:opacity-40 disabled:cursor-not-allowed">Guardar cambio</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-[11px] text-brand-muted py-6 border-t border-brand-border">
+        <a href="aviso-privacidad.html" class="underline hover:text-white">Aviso de privacidad</a> · Capital Barbería · Prol. Pino Suárez 2910, Durango
+    </footer>
+
+    <script src="portal.js"></script>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        let CITAS = [];
+        let BARBEROS = [];
+        const rep = { cita: null, barbero: null, fecha: null, hora: null };
+
+        function irALogin() { location.replace('cuenta.html?sesion=expirada'); }
+
+        async function cargar() {
+            const [r, rb] = await Promise.all([
+                apiPortal('GET', '/api/portal/mis-citas', null, { conSesion: true }),
+                apiPortal('GET', '/api/portal/barberos')
+            ]);
+            if (r.status === 401 || r.status === 403) return irALogin();
+            if (!r.ok) {
+                $('lista-proximas').innerHTML = `<p class="text-sm text-red-300">${escaparHTML(mensajeDe(r))}</p>`;
+                return;
+            }
+            if (rb.ok) BARBEROS = rb.data;
+            const c = r.data.cliente || {};
+            $('nombre-cliente').textContent = c.nombre || leerSesion()?.nombre || '';
+            $('datos-cliente').textContent = [c.email, c.telefono].filter(Boolean).join(' · ');
+            CITAS = r.data.citas || [];
+            pintar();
+        }
+
+        function etiquetaEstado(estado) {
+            const e = ESTADOS_CITA[estado] || { texto: estado, clase: 'border-brand-border text-neutral-300' };
+            return `<span class="text-[11px] font-semibold border px-2 py-0.5 rounded-full ${e.clase}">${escaparHTML(e.texto)}</span>`;
+        }
+
+        function pintar() {
+            const activas = (c) => ['PENDIENTE', 'CONFIRMADA'].includes(c.estado) && c.es_proxima;
+            const proximas = CITAS.filter(activas).sort((a, b) => (a.fecha_cita + a.hora_inicio).localeCompare(b.fecha_cita + b.hora_inicio));
+            const historial = CITAS.filter(c => !activas(c));
+
+            $('lista-proximas').innerHTML = proximas.map(c => `
+                <article class="bg-brand-card border border-brand-border rounded-xl p-5 flex flex-col">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-xs text-brand-muted ">${escaparHTML(capitalizar(fechaLarga(c.fecha_cita, true)))}</p>
+                            <p class="text-2xl font-extrabold text-white mt-0.5">${hora12(c.hora_inicio)}</p>
+                        </div>
+                        ${etiquetaEstado(c.estado)}
+                    </div>
+                    <p class="text-sm text-neutral-200 mt-3">✂️ ${escaparHTML(c.servicio)} · <span class="text-brand-gold font-semibold">${dinero(c.precio)}</span></p>
+                    <p class="text-sm text-neutral-300 mt-1">👤 ${escaparHTML(c.barbero)}</p>
+                    ${c.puede_modificar ? `
+                        <div class="mt-5 pt-4 border-t border-brand-border flex flex-col sm:flex-row gap-2">
+                            <button type="button" data-reprogramar="${escaparHTML(c.id)}" class="flex-1 bg-brand-cardElevated hover:bg-neutral-700 border border-brand-border text-white font-semibold py-2 rounded-lg text-sm transition">Reprogramar</button>
+                            <button type="button" data-cancelar="${escaparHTML(c.id)}" class="flex-1 border border-red-800 text-red-300 hover:bg-red-950/50 font-semibold py-2 rounded-lg text-sm transition">Cancelar cita</button>
+                        </div>` : `
+                        <p class="mt-5 pt-4 border-t border-brand-border text-xs text-amber-200">Faltan menos de 5 horas: para cambios llama al <a href="tel:6183100009" class="underline">618-310-0009</a>.</p>`}
+                </article>`).join('') || `
+                <div class="md:col-span-2 text-center p-8 rounded-xl border border-dashed border-brand-border">
+                    <p class="text-sm text-brand-muted">No tienes citas próximas.</p>
+                    <a href="index.html#agendar" class="inline-block mt-4 bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-5 py-2.5 rounded-lg text-sm transition">Agendar una cita</a>
+                </div>`;
+
+            $('lista-historial').innerHTML = historial.map(c => `
+                <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 rounded-lg bg-brand-card border border-brand-border text-sm">
+                    <div>
+                        <p class="text-neutral-200">${escaparHTML(c.servicio)} · ${escaparHTML(c.barbero)}</p>
+                        <p class="text-xs text-brand-muted ">${escaparHTML(capitalizar(fechaLarga(c.fecha_cita, true)))} · ${hora12(c.hora_inicio)}</p>
+                    </div>
+                    ${etiquetaEstado(c.estado)}
+                </div>`).join('') || '<p class="text-sm text-brand-muted">Aquí aparecerán tus citas pasadas.</p>';
+        }
+
+        // ---------------- Cancelar ----------------
+        async function cancelar(id) {
+            const c = CITAS.find(x => x.id === id);
+            if (!c) return;
+            const ok = await confirmarPortal('¿Cancelar esta cita?', {
+                detalle: `${c.servicio} con ${c.barbero}, ${fechaLarga(c.fecha_cita)} a las ${hora12(c.hora_inicio)}. Esta acción no se puede deshacer.`,
+                textoConfirmar: 'Sí, cancelar', peligro: true
+            });
+            if (!ok) return;
+            const r = await apiPortal('PUT', `/api/portal/mis-citas/${encodeURIComponent(id)}/cancelar`, null, { conSesion: true });
+            if (r.status === 401) return irALogin();
+            if (!r.ok) { mostrarToast(mensajeDe(r, 'No se pudo cancelar.'), 'error'); return cargar(); }
+            mostrarToast('Tu cita fue cancelada.');
+            cargar();
+        }
+
+        // ---------------- Reprogramar ----------------
+        function abrirReprogramar(id) {
+            const c = CITAS.find(x => x.id === id);
+            if (!c) return;
+            Object.assign(rep, { cita: c, barbero: c.barbero_id, fecha: null, hora: null });
+            $('rep-servicio').textContent = `${c.servicio} · ahora: ${fechaLarga(c.fecha_cita)}, ${hora12(c.hora_inicio)} con ${c.barbero}`;
+            const lista = BARBEROS.some(b => b.id === c.barbero_id) ? BARBEROS : [{ id: c.barbero_id, nombre: c.barbero, dias_laborales: [] }, ...BARBEROS];
+            $('rep-barbero').innerHTML = lista.map(b => `<option value="${escaparHTML(b.id)}" ${b.id === c.barbero_id ? 'selected' : ''}>${escaparHTML(b.nombre)}</option>`).join('');
+            pintarDiasRep();
+            $('modal-reprogramar').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            $('rep-barbero').focus();
+        }
+
+        function cerrarReprogramar() {
+            $('modal-reprogramar').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function pintarDiasRep() {
+            const b = BARBEROS.find(x => x.id === rep.barbero);
+            const trabaja = new Set(((b && b.dias_laborales) || []).map(Number));
+            $('rep-dias').innerHTML = diasReservables(21).map(d => {
+                const libre = trabaja.has(d.dow);
+                const sel = rep.fecha === d.fecha;
+                return `<button type="button" data-rep-fecha="${d.fecha}" ${libre ? '' : 'disabled'}
+                    class="shrink-0 w-14 py-2 rounded-xl border text-center transition ${sel ? 'border-brand-gold bg-brand-gold/10 text-white' : libre ? 'border-brand-border bg-brand-dark text-neutral-200 hover:border-neutral-500' : 'border-brand-border/50 text-neutral-600 cursor-not-allowed'}">
+                    <span class="block text-[10px] uppercase">${escaparHTML(d.nombreDia)}</span>
+                    <span class="block text-base font-bold leading-tight">${d.dia}</span>
+                    <span class="block text-[10px] uppercase">${escaparHTML(d.mes)}</span>
+                </button>`;
+            }).join('');
+            const diaSel = document.querySelector('[data-rep-fecha].border-brand-gold');
+            if (diaSel) diaSel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            $('rep-horas').innerHTML = '';
+            $('rep-titulo-horas').textContent = rep.fecha ? 'Buscando horarios…' : 'Elige un día.';
+            $('rep-guardar').disabled = true;
+            if (rep.fecha) cargarHorasRep();
+        }
+
+        let consultaRep = 0;
+        async function cargarHorasRep() {
+            const id = ++consultaRep;
+            const r = await apiPortal('POST', '/api/portal/horarios-disponibles', {
+                fecha: rep.fecha, barbero_id: rep.barbero, servicio_id: rep.cita.servicio_id, excluir_cita_id: rep.cita.id
+            }, { conSesion: true });
+            if (id !== consultaRep) return;
+            if (!r.ok) { $('rep-titulo-horas').textContent = mensajeDe(r, 'No se pudieron cargar los horarios.'); return; }
+            const horas = r.data.horariosDisponibles || [];
+            $('rep-titulo-horas').textContent = horas.length ? 'Elige la nueva hora:' : (r.data.mensaje || 'No hay horarios libres ese día.');
+            $('rep-horas').innerHTML = horas.map(h => `<button type="button" data-rep-hora="${h.hora24}" class="py-2.5 rounded-lg border border-brand-border bg-brand-dark text-sm font-semibold text-neutral-200 hover:border-neutral-500 transition">${escaparHTML(h.hora12)}</button>`).join('');
+        }
+
+        async function guardarReprogramacion() {
+            if (!rep.fecha || !rep.hora) return;
+            const btn = $('rep-guardar');
+            botonCargando(btn, true, 'Guardando...');
+            const cuerpo = { fecha_cita: rep.fecha, hora_inicio: rep.hora };
+            if (rep.barbero !== rep.cita.barbero_id) cuerpo.barbero_id = rep.barbero;
+            const r = await apiPortal('PUT', `/api/portal/mis-citas/${encodeURIComponent(rep.cita.id)}/reprogramar`, cuerpo, { conSesion: true });
+            botonCargando(btn, false);
+            if (r.status === 401) return irALogin();
+            if (!r.ok) {
+                mostrarToast(mensajeDe(r, 'No se pudo reprogramar.'), 'error');
+                if (r.status === 409) { rep.hora = null; pintarDiasRep(); }
+                return;
+            }
+            cerrarReprogramar();
+            mostrarToast('Tu cita fue reprogramada.');
+            cargar();
+        }
+
+        document.addEventListener('click', (e) => {
+            const bc = e.target.closest('[data-cancelar]');
+            if (bc) return cancelar(bc.dataset.cancelar);
+            const br = e.target.closest('[data-reprogramar]');
+            if (br) return abrirReprogramar(br.dataset.reprogramar);
+            const bf = e.target.closest('[data-rep-fecha]');
+            if (bf && !bf.disabled) { rep.fecha = bf.dataset.repFecha; rep.hora = null; return pintarDiasRep(); }
+            const bh = e.target.closest('[data-rep-hora]');
+            if (bh) {
+                rep.hora = bh.dataset.repHora;
+                document.querySelectorAll('[data-rep-hora]').forEach(x => {
+                    const sel = x === bh;
+                    x.classList.toggle('border-brand-gold', sel);
+                    x.classList.toggle('bg-brand-gold/10', sel);
+                    x.classList.toggle('text-white', sel);
+                });
+                $('rep-guardar').disabled = false;
+            }
+        });
+        $('rep-barbero').addEventListener('change', (e) => { rep.barbero = e.target.value; rep.fecha = null; rep.hora = null; pintarDiasRep(); });
+        $('rep-cerrar').addEventListener('click', cerrarReprogramar);
+        $('rep-cancelar').addEventListener('click', cerrarReprogramar);
+        $('rep-guardar').addEventListener('click', guardarReprogramacion);
+        $('modal-reprogramar').addEventListener('click', (e) => { if (e.target.id === 'modal-reprogramar') cerrarReprogramar(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('modal-reprogramar').classList.contains('hidden')) cerrarReprogramar(); });
+
+        cargar();
+    </script>
+</body>
+
+</html>

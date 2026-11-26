@@ -33,4 +33,24 @@ const verificarRol = (rolesPermitidos) => {
     };
 };
 
-module.exports = { verificarToken, verificarRol };
+/**
+ * Para rutas públicas que también aceptan sesión (agendar en el portal):
+ * sin token sigue como invitado (req.user = null); con token válido llena req.user;
+ * con token vencido o alterado responde 401 para que la página pida iniciar sesión otra vez.
+ */
+const verificarTokenOpcional = (req, res, next) => {
+    const tokenHeader = req.headers['authorization'];
+    if (!tokenHeader) {
+        req.user = null;
+        return next();
+    }
+    try {
+        const token = tokenHeader.startsWith('Bearer ') ? tokenHeader.split(' ')[1] : tokenHeader;
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch (error) {
+        return res.status(401).json({ error: 'Tu sesión expiró. Vuelve a iniciar sesión.' });
+    }
+};
+
+module.exports = { verificarToken, verificarRol, verificarTokenOpcional };

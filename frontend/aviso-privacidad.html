@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso de privacidad | Capital Barbería</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+    <style>
+        .aviso h2 { color: #fff; font-weight: 700; font-size: 1.05rem; margin-top: 2rem; margin-bottom: .5rem; }
+        .aviso p, .aviso li { color: #d4d4d8; font-size: .9rem; line-height: 1.65; }
+        .aviso ul { list-style: disc; padding-left: 1.25rem; margin: .5rem 0; }
+        .aviso li { margin: .25rem 0; }
+        .aviso strong { color: #fff; }
+        .pendiente { background: rgba(245, 158, 11, .15); border: 1px dashed rgba(245, 158, 11, .6); color: #fcd34d; padding: 0 .35rem; border-radius: .25rem; font-weight: 600; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen flex flex-col">
+    <header class="border-b border-brand-border bg-black/90">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-lg">C</div>
+                <span class="text-lg font-bold tracking-tight text-white">CAPITAL <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span></span>
+            </a>
+            <a href="index.html" class="text-sm font-semibold text-neutral-300 hover:text-white">← Inicio</a>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-10 aviso">
+        <p class="text-xs uppercase font-bold tracking-widest text-brand-gold">Protección de datos personales</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Aviso de Privacidad Integral</h1>
+        <p class="!text-xs !text-brand-muted mt-2">Versión del 26 de noviembre de 2026. Elaborado conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), publicada en el DOF el 20 de marzo de 2025.</p>
+
+        <h2>1. Responsable de tus datos</h2>
+        <p><strong>Capital Barbería</strong>, representada por <span class="pendiente">[NOMBRE DEL TITULAR O RAZÓN SOCIAL – PRUEBA]</span>, con domicilio en Prol. Pino Suárez 2910, Col. José Guadalupe Rodríguez, Durango, Dgo., es responsable del tratamiento de los datos personales que nos proporcionas.</p>
+        <p>Contacto para temas de privacidad: <span class="pendiente">[CORREO DE CONTACTO – PRUEBA]</span> · Teléfono 618-310-0009 · en persona en el domicilio de la barbería.</p>
+
+        <h2>2. Datos personales que recabamos</h2>
+        <p>Cuando agendas una cita o creas una cuenta en este sitio, o cuando te atendemos en el local, recabamos:</p>
+        <ul>
+            <li><strong>Identificación y contacto:</strong> nombre, apellidos, teléfono celular y correo electrónico.</li>
+            <li><strong>Cuenta:</strong> tu contraseña, que se guarda transformada con un algoritmo de hash (bcrypt), de modo que nadie, ni siquiera la barbería, puede leerla.</li>
+            <li><strong>Citas:</strong> servicio, barbero, fecha, hora, estado de la cita (confirmada, atendida, cancelada o no asistió) y tu historial de visitas.</li>
+            <li><strong>Datos técnicos:</strong> la dirección IP de tu conexión, que se usa de forma temporal para limitar intentos repetidos y proteger el sitio.</li>
+        </ul>
+        <p><strong>No recabamos datos personales sensibles</strong> (como datos de salud, origen étnico o creencias) ni datos financieros. Los pagos se realizan en el local.</p>
+
+        <h2>3. ¿Para qué usamos tus datos?</h2>
+        <p><strong>Finalidades necesarias</strong> para el servicio que nos pides:</p>
+        <ul>
+            <li>Agendar, confirmar, reprogramar o cancelar tus citas y asignarlas al barbero que elegiste.</li>
+            <li>Crear y administrar tu cuenta para que consultes tus citas.</li>
+            <li>Comunicarnos contigo por teléfono o correo sobre tu cita (cambios, retrasos o cancelaciones).</li>
+            <li>Llevar el historial de servicios atendidos y la operación interna de la barbería (agenda, cobro y comisiones de los barberos).</li>
+            <li>Proteger el sitio contra abusos y cumplir con las obligaciones legales que nos apliquen.</li>
+        </ul>
+        <p><strong>Finalidades adicionales:</strong> actualmente <strong>no</strong> usamos tus datos para publicidad, promociones ni para enviarlos a terceros con fines comerciales. Si en el futuro quisiéramos hacerlo, te pediremos tu consentimiento antes y podrás negarte sin que eso afecte tus citas.</p>
+
+        <h2>4. Consentimiento</h2>
+        <p>Al marcar la casilla <strong>“Acepto el aviso de privacidad”</strong> al registrarte o al agendar como invitado, nos das tu consentimiento para tratar tus datos con las finalidades anteriores. Guardamos la fecha, la hora y la versión del aviso que aceptaste. Puedes revocar tu consentimiento en cualquier momento (sección 7); la revocación no tiene efectos hacia atrás y, si es necesaria para el servicio, ya no podremos agendarte en línea.</p>
+
+        <h2>5. ¿Con quién compartimos tus datos?</h2>
+        <p>Tus datos solo los consultan el personal autorizado de la barbería (administración y el barbero que te atiende). No los vendemos ni los transferimos a terceros, salvo cuando una autoridad competente lo requiera conforme a la ley.</p>
+        <p>El sitio se aloja con un proveedor de servicios de internet (servidor y base de datos) que guarda la información por cuenta nuestra y no puede usarla para fines propios. Además, la página carga tipografías y estilos desde servidores de terceros (Google Fonts y Tailwind CSS), que pueden recibir datos técnicos de tu conexión, como tu dirección IP.</p>
+
+        <h2>6. Cuánto tiempo los conservamos</h2>
+        <p>Conservamos tus datos mientras tengas una cuenta o citas con nosotros y el tiempo necesario para cumplir las finalidades y obligaciones legales. Después se bloquean y se eliminan.</p>
+
+        <h2>7. Tus derechos ARCO y cómo ejercerlos</h2>
+        <p>Tienes derecho a <strong>Acceder</strong> a tus datos, <strong>Rectificarlos</strong> si son inexactos, <strong>Cancelarlos</strong> (pedir que los eliminemos) y <strong>Oponerte</strong> a su uso para un fin específico. También puedes revocar tu consentimiento o limitar el uso de tus datos.</p>
+        <p>Envía tu solicitud a <span class="pendiente">[CORREO DE CONTACTO – PRUEBA]</span> o entrégala en la barbería, con:</p>
+        <ul>
+            <li>Tu nombre y un correo o domicilio para responderte.</li>
+            <li>Un documento que acredite tu identidad (o la de tu representante legal).</li>
+            <li>La descripción clara de los datos y del derecho que quieres ejercer.</li>
+        </ul>
+        <p>Te responderemos en un plazo máximo de <strong>20 días</strong>, y si la solicitud procede la haremos efectiva dentro de los <strong>15 días</strong> siguientes, como marca la ley. El trámite es gratuito. Si no estás de acuerdo con nuestra respuesta, puedes acudir a la <strong>Secretaría Anticorrupción y Buen Gobierno</strong>, autoridad en materia de protección de datos personales.</p>
+
+        <h2>8. Uso de almacenamiento en tu navegador</h2>
+        <p>No usamos cookies de rastreo ni de publicidad. Cuando inicias sesión, el sitio guarda en tu navegador un identificador de sesión que expira en 8 horas y se borra al cerrar sesión.</p>
+
+        <h2>9. Cambios a este aviso</h2>
+        <p>Cualquier cambio se publicará en esta misma página con su nueva fecha de versión. Si el cambio requiere de nuevo tu consentimiento, te lo pediremos al iniciar sesión o al agendar.</p>
+
+        <div class="mt-10 p-4 rounded-xl border border-brand-border bg-brand-card">
+            <p class="!text-xs">¿Dudas sobre tus datos? Llámanos al <a href="tel:6183100009" class="underline">618-310-0009</a> o visítanos en Prol. Pino Suárez 2910, Durango, Dgo.</p>
+        </div>
+    </main>
+
+    <footer class="text-center text-[11px] text-brand-muted py-6 border-t border-brand-border">
+        Capital Barbería · <a href="index.html" class="underline hover:text-white">Inicio</a> · <a href="index.html#agendar" class="underline hover:text-white">Agendar cita</a>
+    </footer>
+    <script src="portal.js"></script>
+</body>
+
+</html>

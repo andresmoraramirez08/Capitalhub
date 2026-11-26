@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi cuenta | Capital Barbería</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-gold selection:text-black">
+    <header class="border-b border-brand-border bg-black/90">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-lg">C</div>
+                <span class="text-lg font-bold tracking-tight text-white">CAPITAL <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span></span>
+            </a>
+            <a href="index.html#agendar" class="text-sm font-semibold text-neutral-300 hover:text-white">← Volver</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-start sm:items-center justify-center px-4 py-10">
+        <div class="w-full max-w-md bg-brand-card border border-brand-border rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div class="grid grid-cols-2 gap-2 p-1 bg-brand-dark rounded-xl border border-brand-border mb-6" role="tablist">
+                <button type="button" id="tab-login" role="tab" class="py-2 text-sm font-bold rounded-lg">Iniciar sesión</button>
+                <button type="button" id="tab-registro" role="tab" class="py-2 text-sm font-bold rounded-lg">Crear cuenta</button>
+            </div>
+
+            <p id="aviso-sesion" class="hidden mb-4 text-sm text-amber-200 bg-amber-950/40 border border-amber-800 rounded-lg px-3 py-2"></p>
+
+            <!-- Iniciar sesión -->
+            <form id="form-login" class="space-y-4" novalidate>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Bienvenido de vuelta</h1>
+                    <p class="text-sm text-brand-muted mt-1">Entra para ver, cancelar o reprogramar tus citas.</p>
+                </div>
+                <div>
+                    <label for="login-email" class="block text-xs font-semibold text-brand-muted mb-1">Correo electrónico</label>
+                    <input id="login-email" type="email" autocomplete="email" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-xs font-semibold text-brand-muted mb-1">Contraseña</label>
+                    <input id="login-password" type="password" autocomplete="current-password" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                </div>
+                <button type="submit" id="btn-login" class="w-full bg-brand-gold hover:bg-brand-goldHover text-black font-bold py-3 rounded-lg transition">Iniciar sesión</button>
+                <p class="text-xs text-brand-muted text-center">¿Olvidaste tu contraseña? Pide ayuda en la barbería: <a href="tel:6183100009" class="underline">618-310-0009</a>.</p>
+            </form>
+
+            <!-- Crear cuenta -->
+            <form id="form-registro" class="hidden space-y-4" novalidate>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Crea tu cuenta</h1>
+                    <p class="text-sm text-brand-muted mt-1">Agenda más rápido y administra tus citas.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="reg-nombre" class="block text-xs font-semibold text-brand-muted mb-1">Nombre(s)</label>
+                        <input id="reg-nombre" type="text" autocomplete="given-name" maxlength="100" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                    </div>
+                    <div>
+                        <label for="reg-apellidos" class="block text-xs font-semibold text-brand-muted mb-1">Apellidos</label>
+                        <input id="reg-apellidos" type="text" autocomplete="family-name" maxlength="100" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                    </div>
+                </div>
+                <div>
+                    <label for="reg-telefono" class="block text-xs font-semibold text-brand-muted mb-1">Teléfono celular (10 dígitos)</label>
+                    <input id="reg-telefono" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold" placeholder="618 123 4567">
+                    <p class="text-[11px] text-brand-muted mt-1">Si ya te atendimos en el local, usa el mismo teléfono que diste ahí.</p>
+                </div>
+                <div>
+                    <label for="reg-email" class="block text-xs font-semibold text-brand-muted mb-1">Correo electrónico</label>
+                    <input id="reg-email" type="email" autocomplete="email" maxlength="150" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="reg-password" class="block text-xs font-semibold text-brand-muted mb-1">Contraseña</label>
+                        <input id="reg-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                    </div>
+                    <div>
+                        <label for="reg-password2" class="block text-xs font-semibold text-brand-muted mb-1">Repetir contraseña</label>
+                        <input id="reg-password2" type="password" autocomplete="new-password" maxlength="72" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-brand-gold">
+                    </div>
+                </div>
+                <p class="text-[11px] text-brand-muted -mt-2">Mínimo 8 caracteres.</p>
+                <label class="flex items-start gap-3 text-xs text-neutral-300">
+                    <input id="reg-aviso" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-brand-border bg-black">
+                    <span>Acepto el <a href="aviso-privacidad.html" target="_blank" rel="noopener" class="underline text-white">aviso de privacidad</a> y el uso de mis datos para gestionar mi cuenta y mis citas.</span>
+                </label>
+                <button type="submit" id="btn-registro" class="w-full bg-brand-gold hover:bg-brand-goldHover text-black font-bold py-3 rounded-lg transition">Crear cuenta</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="text-center text-[11px] text-brand-muted py-6 border-t border-brand-border">
+        <a href="aviso-privacidad.html" class="underline hover:text-white">Aviso de privacidad</a> · Capital Barbería · <a href="login.html" class="hover:text-white">Soy Barbero / Admin</a>
+    </footer>
+
+    <script src="portal.js"></script>
+    <script>
+        const params = new URLSearchParams(location.search);
+        const volverAAgendar = params.get('volver') === 'agendar';
+        const $ = (id) => document.getElementById(id);
+
+        // Si ya hay sesión, no tiene caso mostrar esta pantalla
+        const sesion = leerSesion();
+        if (sesion && !params.get('sesion')) {
+            location.replace(sesion.rol === '3' && volverAAgendar ? 'index.html#agendar' : destinoPorRol(sesion.rol));
+        }
+
+        if (params.get('sesion') === 'expirada') {
+            $('aviso-sesion').textContent = 'Tu sesión expiró. Vuelve a iniciar sesión.';
+            $('aviso-sesion').classList.remove('hidden');
+        }
+
+        function mostrarModo(modo) {
+            const registro = modo === 'registro';
+            $('form-login').classList.toggle('hidden', registro);
+            $('form-registro').classList.toggle('hidden', !registro);
+            $('tab-login').className = `py-2 text-sm font-bold rounded-lg ${!registro ? 'bg-brand-cardElevated text-brand-gold border border-brand-border' : 'text-neutral-400 hover:text-white'}`;
+            $('tab-registro').className = `py-2 text-sm font-bold rounded-lg ${registro ? 'bg-brand-cardElevated text-brand-gold border border-brand-border' : 'text-neutral-400 hover:text-white'}`;
+            $('tab-login').setAttribute('aria-selected', String(!registro));
+            $('tab-registro').setAttribute('aria-selected', String(registro));
+            document.title = registro ? 'Crear cuenta | Capital Barbería' : 'Iniciar sesión | Capital Barbería';
+        }
+        $('tab-login').addEventListener('click', () => mostrarModo('login'));
+        $('tab-registro').addEventListener('click', () => mostrarModo('registro'));
+        mostrarModo(params.get('modo') === 'registro' ? 'registro' : 'login');
+
+        function entrar(data) {
+            guardarSesion(data);
+            if (String(data.rol) === '3' && volverAAgendar) return location.replace('index.html#agendar');
+            location.replace(destinoPorRol(data.rol));
+        }
+
+        $('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = $('login-email').value.trim().toLowerCase();
+            const password = $('login-password').value;
+            if (!email || !password) return mostrarToast('Escribe tu correo y contraseña.', 'error');
+            const btn = $('btn-login');
+            botonCargando(btn, true, 'Verificando...');
+            const r = await apiPortal('POST', '/api/auth/login', { email, password });
+            botonCargando(btn, false);
+            if (!r.ok) return mostrarToast(mensajeDe(r, 'Credenciales inválidas'), 'error');
+            entrar(r.data);
+        });
+
+        $('form-registro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const datos = {
+                nombre: $('reg-nombre').value.trim(),
+                apellidos: $('reg-apellidos').value.trim(),
+                telefono: $('reg-telefono').value.trim(),
+                email: $('reg-email').value.trim().toLowerCase(),
+                password: $('reg-password').value,
+                acepta_aviso: $('reg-aviso').checked
+            };
+            const digitos = datos.telefono.replace(/\D/g, '');
+            let error = '';
+            if (datos.nombre.length < 2 || datos.apellidos.length < 2) error = 'Escribe tu nombre y tus apellidos.';
+            else if (!(digitos.length === 10 || (digitos.length === 12 && digitos.startsWith('52')))) error = 'El teléfono debe tener 10 dígitos.';
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) error = 'Escribe un correo válido.';
+            else if (datos.password.length < 8) error = 'La contraseña debe tener al menos 8 caracteres.';
+            else if (datos.password !== $('reg-password2').value) error = 'Las contraseñas no coinciden.';
+            else if (!datos.acepta_aviso) error = 'Debes aceptar el aviso de privacidad para crear tu cuenta.';
+            if (error) return mostrarToast(error, 'error');
+
+            const btn = $('btn-registro');
+            botonCargando(btn, true, 'Creando cuenta...');
+            const r = await apiPortal('POST', '/api/auth/registro', datos);
+            botonCargando(btn, false);
+            if (!r.ok) return mostrarToast(mensajeDe(r, 'No se pudo crear la cuenta.'), 'error');
+            mostrarToast('¡Cuenta creada!');
+            setTimeout(() => entrar(r.data), 600);
+        });
+    </script>
+</body>
+
+</html>

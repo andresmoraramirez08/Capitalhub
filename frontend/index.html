@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Barbería | Agenda tu cita en línea</title>
+    <meta name="description" content="Capital Barbería en Durango: servicios, combos, equipo de barberos y reserva de citas en línea.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            gold: '#D4D4D8', goldHover: '#A1A1AA', dark: '#09090B', card: '#18181B',
+                            cardElevated: '#27272A', border: '#3F3F46', muted: '#A1A1AA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none; }
+        .opcion-sel { border-color: rgba(212, 212, 216, .7) !important; background: rgba(212, 212, 216, .06) !important; }
+        .chips-scroll { scrollbar-width: thin; }
+    </style>
+</head>
+
+<body class="bg-brand-dark text-neutral-100 font-sans antialiased min-h-screen selection:bg-brand-gold selection:text-black">
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-black/90 border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-gold to-amber-300 flex items-center justify-center font-extrabold text-black text-xl shadow-lg shadow-brand-gold/20">C</div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white block leading-none">CAPITAL</span>
+                    <span class="text-xs uppercase tracking-widest text-brand-gold font-semibold">Barbería</span>
+                </div>
+            </a>
+
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-neutral-300">
+                <a href="#servicios" class="hover:text-brand-gold transition-colors">Servicios & Combos</a>
+                <a href="#barberos" class="hover:text-brand-gold transition-colors">Equipo</a>
+                <a href="#tienda" class="hover:text-brand-gold transition-colors">Productos</a>
+                <a href="#ubicacion" class="hover:text-brand-gold transition-colors">Ubicación</a>
+            </nav>
+
+            <div class="flex items-center gap-3 sm:gap-4">
+                <a href="login.html" class="hidden lg:inline-flex text-xs font-semibold text-neutral-500 hover:text-white transition">Soy Barbero / Admin</a>
+                <div data-zona-sesion class="hidden sm:flex items-center gap-4"></div>
+                <a href="#agendar" class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-4 sm:px-5 py-2.5 rounded-lg text-sm transition shadow-lg shadow-brand-gold/25">Agendar Cita</a>
+                <button id="btn-menu-portal" type="button" class="md:hidden p-2 -mr-2 text-neutral-300 hover:text-white" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-portal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Menú para celular -->
+        <div id="menu-portal" class="hidden md:hidden border-t border-brand-border bg-black/95 px-4 py-4 space-y-1 text-sm">
+            <a href="#servicios" class="block py-2 text-neutral-200">Servicios & Combos</a>
+            <a href="#barberos" class="block py-2 text-neutral-200">Equipo</a>
+            <a href="#tienda" class="block py-2 text-neutral-200">Productos</a>
+            <a href="#ubicacion" class="block py-2 text-neutral-200">Ubicación</a>
+            <div data-zona-sesion class="flex items-center gap-4 pt-3 mt-2 border-t border-brand-border"></div>
+            <a href="login.html" class="block pt-3 text-xs text-neutral-500">Soy Barbero / Admin</a>
+        </div>
+    </header>
+
+    <!-- ================= HERO ================= -->
+    <section class="relative pt-10 pb-16 md:pt-20 md:pb-28 overflow-hidden bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-brand-gold animate-pulse"></span>
+                        <span>Atención Profesional en Durango Capital</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        El arte del cuidado <br class="hidden sm:inline">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-500">masculino premium.</span>
+                    </h1>
+                    <p class="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto lg:mx-0">
+                        Reserva tu turno en línea con tu barbero favorito con mínimo 24 horas de antelación, como invitado o con tu cuenta.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#agendar" class="w-full sm:w-auto text-center bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-8 py-3.5 rounded-xl shadow-xl shadow-brand-gold/25 transition">Reservar Cita Online</a>
+                        <a href="#servicios" class="w-full sm:w-auto text-center border border-brand-border hover:border-neutral-500 bg-brand-card text-white font-semibold px-6 py-3.5 rounded-xl transition">Ver Servicios</a>
+                    </div>
+                    <div class="grid grid-cols-3 gap-6 pt-6 border-t border-brand-border max-w-lg mx-auto lg:mx-0 text-center sm:text-left">
+                        <div>
+                            <p id="stat-barberos" class="text-2xl font-bold text-white">—</p>
+                            <p class="text-xs text-brand-muted">Barberos expertos</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">24h</p>
+                            <p class="text-xs text-brand-muted">Anticipación web</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">10 min</p>
+                            <p class="text-xs text-brand-muted">Margen tolerancia</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 relative">
+                    <div class="relative mx-auto max-w-md rounded-2xl border border-brand-border bg-brand-card p-6 shadow-2xl">
+                        <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+                            <span class="text-xs font-semibold text-brand-muted uppercase tracking-wider">Cita Rápida</span>
+                            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">Turnos Disponibles</span>
+                        </div>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-brand-muted mb-1">Servicio destacado</label>
+                                <div class="p-3 bg-brand-dark rounded-lg border border-brand-border text-sm flex justify-between items-center gap-3">
+                                    <span id="destacado-nombre" class="font-medium text-white">Cargando…</span>
+                                    <span id="destacado-precio" class="text-brand-gold font-bold whitespace-nowrap"></span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-brand-muted mb-1">Duración optimizada</label>
+                                    <div id="destacado-duracion" class="p-2.5 bg-brand-dark rounded-lg border border-brand-border text-xs text-neutral-300">⏱️ —</div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-brand-muted mb-1">Modalidad</label>
+                                    <div class="p-2.5 bg-brand-dark rounded-lg border border-brand-border text-xs text-neutral-300">👤 Con cuenta o Invitado</div>
+                                </div>
+                            </div>
+                            <button id="btn-destacado" type="button" class="block w-full text-center bg-brand-cardElevated hover:bg-neutral-800 text-white font-semibold py-2.5 rounded-lg text-xs transition border border-brand-border">
+                                Iniciar Asistente de Agendamiento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= SERVICIOS Y COMBOS ================= -->
+    <section id="servicios" class="py-16 bg-black border-t border-brand-border scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs uppercase font-bold tracking-widest text-brand-gold mb-2">Menú de Barbería</h2>
+                <p class="text-3xl font-extrabold text-white tracking-tight">Servicios Individuales y Combos</p>
+                <p class="text-sm text-brand-muted mt-2">Tiempos de silla optimizados para tu comodidad y cobro justo.</p>
+            </div>
+            <div id="lista-servicios" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-sm text-brand-muted col-span-full text-center">Cargando servicios…</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= EQUIPO ================= -->
+    <section id="barberos" class="py-16 bg-brand-dark border-t border-brand-border scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs uppercase font-bold tracking-widest text-brand-gold mb-2">Nuestro Equipo</h2>
+                <p class="text-3xl font-extrabold text-white tracking-tight">Elige a tu barbero</p>
+                <p class="text-sm text-brand-muted mt-2">Cada barbero tiene su propio horario y día de descanso.</p>
+            </div>
+            <div id="lista-barberos" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-sm text-brand-muted col-span-full text-center">Cargando equipo…</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ASISTENTE DE RESERVA ================= -->
+    <section id="agendar" class="py-16 sm:py-20 border-t border-brand-border bg-black scroll-mt-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <span class="text-xs font-bold text-brand-gold uppercase tracking-wider">Flujo de Reserva</span>
+                <h2 class="text-3xl font-extrabold text-white mt-1">Agenda tu Turno en 4 Pasos</h2>
+                <p class="text-xs text-brand-muted mt-2">Política obligatoria: reserva mínima con 24 horas de anticipación. Puedes cancelar o reprogramar hasta 5 horas antes.</p>
+            </div>
+
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 shadow-2xl">
+                <!-- Indicador de pasos -->
+                <ol id="indicador-pasos" class="grid grid-cols-4 gap-2 mb-6 text-center text-[11px] sm:text-xs font-semibold">
+                    <li><button type="button" data-ir-paso="1" class="w-full pb-2 border-b-2">1. Servicio</button></li>
+                    <li><button type="button" data-ir-paso="2" class="w-full pb-2 border-b-2">2. Barbero</button></li>
+                    <li><button type="button" data-ir-paso="3" class="w-full pb-2 border-b-2">3. Fecha<span class="hidden sm:inline"> & Hora</span></button></li>
+                    <li><button type="button" data-ir-paso="4" class="w-full pb-2 border-b-2">4. Datos</button></li>
+                </ol>
+
+                <!-- Resumen de lo elegido -->
+                <div id="resumen-reserva" class="hidden mb-6 p-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-neutral-300 flex flex-wrap gap-x-4 gap-y-1"></div>
+
+                <!-- Paso 1 -->
+                <div data-paso="1">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 1: Elige el servicio o combo</h3>
+                    <div id="opciones-servicio" class="grid sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div data-paso="2" class="hidden">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 2: Elige a tu barbero</h3>
+                    <div id="opciones-barbero" class="grid sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div data-paso="3" class="hidden">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 3: Elige el día y la hora</h3>
+                    <div id="opciones-dia" class="chips-scroll flex gap-2 overflow-x-auto pb-3 -mx-1 px-1"></div>
+                    <p class="text-[11px] text-brand-muted mt-1">Los días en gris son de descanso del barbero.</p>
+                    <div class="mt-5">
+                        <p id="titulo-horas" class="text-xs font-semibold text-brand-muted mb-2">Elige un día para ver los horarios.</p>
+                        <div id="opciones-hora" class="grid grid-cols-3 sm:grid-cols-5 gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- Paso 4 -->
+                <div data-paso="4" class="hidden">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Paso 4: Tus datos</h3>
+
+                    <!-- Con sesión de cliente -->
+                    <div id="datos-con-cuenta" class="hidden p-4 rounded-xl bg-brand-dark border border-brand-border text-sm">
+                        <p class="text-neutral-300">Agendarás con tu cuenta: <strong id="nombre-cuenta" class="text-white"></strong></p>
+                        <p class="text-xs text-brand-muted mt-1">Usaremos el teléfono y correo de tu cuenta. ¿No eres tú? <button type="button" id="btn-cambiar-cuenta" class="underline hover:text-white">Cerrar sesión</button></p>
+                    </div>
+
+                    <!-- Sin sesión -->
+                    <div id="datos-sin-cuenta">
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-brand-dark rounded-xl border border-brand-border mb-4" role="tablist">
+                            <button type="button" id="tab-invitado" role="tab" class="py-2 text-xs font-bold rounded-lg">Continuar como Invitado</button>
+                            <button type="button" id="tab-cuenta" role="tab" class="py-2 text-xs font-bold rounded-lg">Tengo una Cuenta</button>
+                        </div>
+
+                        <form id="form-invitado" class="space-y-3" novalidate>
+                            <div class="grid sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="inv-nombre" class="block text-xs font-semibold text-brand-muted mb-1">Nombre(s)</label>
+                                    <input id="inv-nombre" type="text" autocomplete="given-name" maxlength="60" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                                </div>
+                                <div>
+                                    <label for="inv-apellidos" class="block text-xs font-semibold text-brand-muted mb-1">Apellidos</label>
+                                    <input id="inv-apellidos" type="text" autocomplete="family-name" maxlength="60" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                                </div>
+                                <div>
+                                    <label for="inv-telefono" class="block text-xs font-semibold text-brand-muted mb-1">Teléfono celular (10 dígitos)</label>
+                                    <input id="inv-telefono" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold" placeholder="618 123 4567">
+                                </div>
+                                <div>
+                                    <label for="inv-email" class="block text-xs font-semibold text-brand-muted mb-1">Correo electrónico</label>
+                                    <input id="inv-email" type="email" autocomplete="email" maxlength="150" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                                </div>
+                            </div>
+                            <!-- Campo trampa para bots (oculto a las personas) -->
+                            <div class="hidden" aria-hidden="true">
+                                <label for="inv-sitio">No llenar</label>
+                                <input id="inv-sitio" type="text" tabindex="-1" autocomplete="off">
+                            </div>
+                            <label class="flex items-start gap-3 text-xs text-neutral-300 pt-1">
+                                <input id="inv-aviso" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-brand-border bg-black">
+                                <span>Acepto el <a href="aviso-privacidad.html" target="_blank" rel="noopener" class="underline text-white">aviso de privacidad</a> y el uso de mis datos para gestionar mi cita.</span>
+                            </label>
+                            <p class="text-[11px] text-brand-muted">¿Quieres ver y cambiar tus citas después? <a href="cuenta.html?modo=registro&volver=agendar" id="link-crear-cuenta" class="underline text-neutral-200">Crea una cuenta</a>.</p>
+                        </form>
+
+                        <form id="form-login-reserva" class="hidden space-y-3" novalidate>
+                            <div class="grid sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="log-email" class="block text-xs font-semibold text-brand-muted mb-1">Correo electrónico</label>
+                                    <input id="log-email" type="email" autocomplete="email" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                                </div>
+                                <div>
+                                    <label for="log-password" class="block text-xs font-semibold text-brand-muted mb-1">Contraseña</label>
+                                    <input id="log-password" type="password" autocomplete="current-password" required class="w-full bg-black border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <a href="cuenta.html?modo=registro&volver=agendar" id="link-crear-cuenta-2" class="text-[11px] underline text-neutral-300">¿No tienes cuenta? Regístrate</a>
+                                <button type="submit" id="btn-login-reserva" class="bg-brand-cardElevated hover:bg-neutral-700 border border-brand-border text-white font-semibold px-4 py-2 rounded-lg text-xs transition">Iniciar sesión</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Éxito -->
+                <div data-paso="exito" class="hidden text-center py-6">
+                    <div class="mx-auto w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl">✓</div>
+                    <h3 class="text-xl font-extrabold text-white mt-4">¡Tu cita quedó agendada!</h3>
+                    <div id="detalle-exito" class="mt-4 inline-block text-left text-sm text-neutral-300 bg-brand-dark border border-brand-border rounded-xl p-4 space-y-1"></div>
+                    <p class="text-xs text-brand-muted mt-4 max-w-md mx-auto">Llega a tiempo: hay 10 minutos de tolerancia. Para cancelar o cambiar la cita con menos de 5 horas, llama al <a href="tel:6183100009" class="underline">618-310-0009</a>.</p>
+                    <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+                        <a id="btn-ir-mis-citas" href="mis-citas.html" class="hidden bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-6 py-2.5 rounded-lg text-sm transition">Ver mis citas</a>
+                        <button type="button" id="btn-otra-cita" class="border border-brand-border text-white font-semibold px-6 py-2.5 rounded-lg text-sm hover:bg-brand-cardElevated transition">Agendar otra cita</button>
+                    </div>
+                </div>
+
+                <!-- Navegación -->
+                <div id="nav-pasos" class="mt-8 flex items-center justify-between gap-3">
+                    <button type="button" id="btn-atras" class="invisible text-xs font-semibold text-neutral-400 hover:text-white px-3 py-2.5">← Atrás</button>
+                    <button type="button" id="btn-siguiente" class="bg-brand-gold hover:bg-brand-goldHover text-black font-bold px-6 py-2.5 rounded-lg text-sm transition disabled:opacity-40 disabled:cursor-not-allowed">Continuar →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= PRODUCTOS ================= -->
+    <section id="tienda" class="py-16 bg-brand-dark border-t border-brand-border scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+                <div>
+                    <span class="text-xs uppercase font-bold tracking-widest text-brand-gold">Productos</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Catálogo de Productos</h2>
+                    <p class="text-xs text-brand-muted mt-1">Consulta lo que tenemos y pídelo en tu próxima visita.</p>
+                </div>
+                <div class="inline-flex items-center space-x-2 text-xs bg-brand-card px-3 py-2 rounded-lg border border-brand-border text-brand-muted self-start md:self-auto">
+                    <span>📦 Venta en sucursal</span>
+                    <strong class="text-white">Efectivo o tarjeta</strong>
+                </div>
+            </div>
+            <div id="lista-productos" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <p class="text-sm text-brand-muted col-span-full text-center">Cargando productos…</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= UBICACIÓN ================= -->
+    <section id="ubicacion" class="py-12 border-t border-brand-border bg-black scroll-mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div>
+                <h3 class="text-white font-bold text-base">Capital Barbería</h3>
+                <p class="text-xs text-brand-muted mt-1">Prol. Pino Suárez 2910, José Guadalupe Rodriguez, Durango, Dgo.</p>
+                <p class="text-xs text-brand-gold mt-1">📞 Teléfono: <a href="tel:6183100009" class="hover:underline">618-310-0009</a></p>
+                <a href="https://www.google.com/maps/search/?api=1&query=Prol.+Pino+Su%C3%A1rez+2910%2C+Durango%2C+Dgo." target="_blank" rel="noopener" class="inline-block mt-3 text-xs font-semibold border border-brand-border rounded-lg px-3 py-1.5 text-neutral-200 hover:bg-brand-card">Cómo llegar ↗</a>
+            </div>
+            <div class="text-xs text-brand-muted text-center sm:text-right space-y-1">
+                <p><a href="aviso-privacidad.html" class="underline hover:text-white">Aviso de privacidad</a></p>
+                <p>Proyecto de Estadía Profesional - Kevin Mora</p>
+                <p class="text-[10px] text-neutral-500">Universidad Politécnica de Durango (UNIPOLI) · © <span id="anio-actual"></span></p>
+            </div>
+        </div>
+    </section>
+
+    <script src="portal.js"></script>
+    <script src="inicio.js"></script>
+</body>
+
+</html>

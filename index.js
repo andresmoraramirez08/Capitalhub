@@ -26,6 +26,7 @@ app.use('/api/horarios', require('./routes/horarios.routes'));
 app.use('/api/clientes', require('./routes/clientes.routes'));
 app.use('/api/catalogo', require('./routes/catalogo.routes'));
 app.use('/api/comisiones', require('./routes/comisiones.routes'));
+app.use('/api/portal', require('./routes/portal.routes')); // portal del cliente (página pública)
 
 // Configuración de la conexión a PostgreSQL
 const pool = require('./config/db');
@@ -38,8 +39,8 @@ pool.connect()
   })
   .catch(err => console.error('🔴 Error al conectar con PostgreSQL (Esperando a que termine la instalación...)'));
 
-// Ruta de prueba inicial
-app.get('/', (req, res) => {
+// Ruta de prueba (la raíz "/" ahora muestra la página pública frontend/index.html)
+app.get('/api/salud', (req, res) => {
   res.json({ mensaje: '¡Servidor de CapitalHub funcionando al 100%!' });
 });
 

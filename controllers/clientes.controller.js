@@ -59,63 +59,81 @@ const listarClientes = async (req, res) => {
     }
 };
 
+/**
+ * Busca un cliente (rol 3) por teléfono o correo; si no existe, lo crea sin contraseña.
+ * La usan el panel (crearClienteRapido) y el portal (citas de invitado).
+ * db: pool o client de una transacción. extras: columnas opcionales al crear (aviso de privacidad).
+ * Regresa { cliente, existente }.
+ */
+const buscarOCrearCliente = async (db, { nombre, apellidos, telefono, email }, extras = {}) => {
+    const nombreLimpio = (nombre || '').trim();
+    const telLimpio = (telefono || '').trim();
+    const emailLimpio = (email || '').trim().toLowerCase();
+    const apellidosLimpio = (apellidos || '').trim();
+
+    // Buscar si ya existe un cliente con ese teléfono o correo
+    const existente = await db.query(
+        `SELECT id, nombre, apellidos, telefono, email, activo
+         FROM usuarios
+         WHERE rol_id = $1
+           AND (
+               telefono = $2
+               OR ($3 <> '' AND LOWER(COALESCE(email, '')) = $3)
+           )
+         LIMIT 1`,
+        [ROL_CLIENTE, telLimpio, emailLimpio]
+    );
+    if (existente.rowCount > 0) {
+        return { cliente: existente.rows[0], existente: true };
+    }
+
+    // La columna email es obligatoria y única: si no se captura, se genera uno interno con el teléfono
+    const emailFinal = emailLimpio || `${telLimpio.replace(/\D/g, '') || idNuevoCorto()}@clientes.capitalhub.local`;
+    const idNuevo = crypto.randomUUID();
+    // Sin contraseña real: no puede iniciar sesión hasta que el cliente se registre en el portal
+    const passwordTemporal = crypto.createHash('sha256').update(crypto.randomUUID()).digest('hex');
+
+    const insertRes = await db.query(
+        `INSERT INTO usuarios (id, nombre, apellidos, telefono, email, password_hash, rol_id, activo,
+                               aviso_privacidad_aceptado_en, aviso_privacidad_version)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9)
+         RETURNING id, nombre, apellidos, telefono, email, activo`,
+        [
+            idNuevo,
+            nombreLimpio,
+            apellidosLimpio,          // apellidos es NOT NULL: se guarda vacío si no se captura
+            telLimpio,
+            emailFinal,
+            passwordTemporal,
+            ROL_CLIENTE,
+            extras.aviso_privacidad_aceptado_en || null,
+            extras.aviso_privacidad_version || null
+        ]
+    );
+    return { cliente: insertRes.rows[0], existente: false };
+};
+
 const crearClienteRapido = async (req, res) => {
     try {
         const { nombre, apellidos, telefono, email } = req.body;
         const nombreLimpio = (nombre || '').trim();
         const telLimpio = (telefono || '').trim();
-        const emailLimpio = (email || '').trim().toLowerCase();
-        const apellidosLimpio = (apellidos || '').trim();
 
         if (!nombreLimpio || !telLimpio) {
             return res.status(400).json({ message: 'Nombre y teléfono son obligatorios' });
         }
 
-        // Buscar si ya existe un cliente con ese teléfono o correo
-        const existente = await pool.query(
-            `SELECT id, nombre, apellidos, telefono, email, activo
-             FROM usuarios
-             WHERE rol_id = $1
-               AND (
-                   telefono = $2
-                   OR ($3 <> '' AND LOWER(COALESCE(email, '')) = $3)
-               )
-             LIMIT 1`,
-            [ROL_CLIENTE, telLimpio, emailLimpio]
-        );
-
-        if (existente.rowCount > 0) {
+        const { cliente, existente } = await buscarOCrearCliente(pool, { nombre, apellidos, telefono, email });
+        if (existente) {
             return res.status(200).json({
                 message: 'Cliente ya registrado; se reutilizó su perfil',
-                cliente: existente.rows[0],
+                cliente,
                 existente: true
             });
         }
-
-        // La columna email es obligatoria y única: si no se captura, se genera uno interno con el teléfono
-        const emailFinal = emailLimpio || `${telLimpio.replace(/\D/g, '') || idNuevoCorto()}@clientes.capitalhub.local`;
-
-        const idNuevo = crypto.randomUUID();
-        const passwordTemporal = crypto.createHash('sha256').update(crypto.randomUUID()).digest('hex');
-
-        const insertRes = await pool.query(
-            `INSERT INTO usuarios (id, nombre, apellidos, telefono, email, password_hash, rol_id, activo)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-             RETURNING id, nombre, apellidos, telefono, email, activo`,
-            [
-                idNuevo,
-                nombreLimpio,
-                apellidosLimpio,          // apellidos es NOT NULL: se guarda vacío si no se captura
-                telLimpio,
-                emailFinal,
-                passwordTemporal,
-                ROL_CLIENTE
-            ]
-        );
-
         res.status(201).json({
             message: 'Cliente creado con rol 3',
-            cliente: insertRes.rows[0],
+            cliente,
             existente: false
         });
     } catch (error) {
@@ -176,5 +194,7 @@ const obtenerHistorialCliente = async (req, res) => {
 module.exports = {
     listarClientes,
     crearClienteRapido,
-    obtenerHistorialCliente
+    obtenerHistorialCliente,
+    buscarOCrearCliente,
+    ROL_CLIENTE
 };

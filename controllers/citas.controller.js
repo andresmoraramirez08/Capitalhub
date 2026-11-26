@@ -203,93 +203,104 @@ const reprogramarCita = async (req, res) => {
     }
 };
 
+/**
+ * Calcula los horarios libres de un barbero en una fecha para un servicio.
+ * La usan el panel (obtenerHorariosDisponibles) y el portal del cliente.
+ * Regresa { ok: true, horarios: [{hora24, hora12}], mensaje } o { ok: false, status, error }.
+ */
+const calcularHorariosLibres = async (db, { fecha, barbero_id, servicio_id, excluirCitaId = null }) => {
+    const servicioQuery = await db.query(
+        'SELECT duracion_minutos FROM servicios WHERE id = $1',
+        [servicio_id]
+    );
+
+    if (servicioQuery.rows.length === 0) {
+        return { ok: false, status: 404, error: 'Servicio no encontrado' };
+    }
+
+    const tiempoServicio = servicioQuery.rows[0].duracion_minutos;
+    const tiempoTotalRequerido = tiempoServicio + 10; 
+
+    const citasOcupadasQuery = await db.query(
+        `SELECT hora_inicio, hora_fin FROM citas 
+         WHERE barbero_id = $1 AND fecha_cita = $2 AND estado NOT IN ('CANCELADA', 'NO_ASISTIO')
+           AND ($3::uuid IS NULL OR id <> $3::uuid)
+         ORDER BY hora_inicio ASC`,
+        [barbero_id, fecha, excluirCitaId]
+    );
+    const citasOcupadas = citasOcupadasQuery.rows;
+
+    const fechaObj = new Date(fecha + 'T12:00:00'); 
+    const diaSemana = fechaObj.getDay(); 
+
+    const horarioQuery = await db.query(
+        'SELECT hora_inicio, hora_fin, es_descanso FROM horarios_barberos WHERE barbero_id = $1 AND dia_semana = $2',
+        [barbero_id, diaSemana]
+    );
+
+    if (horarioQuery.rows.length === 0 || horarioQuery.rows[0].es_descanso) {
+        return { ok: true, horarios: [], mensaje: "El barbero no trabaja este día o está de descanso" };
+    }
+
+    const turnoBarbero = horarioQuery.rows[0];
+    const [horaEntrada, minEntrada] = turnoBarbero.hora_inicio.split(':').map(Number);
+    const [horaSalida, minSalida] = turnoBarbero.hora_fin.split(':').map(Number);
+
+    const aperturaMinutos = (horaEntrada * 60) + minEntrada;
+    const cierreMinutos = (horaSalida * 60) + minSalida;
+    const intervalo = 30; 
+
+    const citasEnMinutos = citasOcupadas.map(cita => {
+        const [horaI, minI] = cita.hora_inicio.split(':').map(Number);
+        const [horaF, minF] = cita.hora_fin.split(':').map(Number);
+        return {
+            inicio: (horaI * 60) + minI,
+            fin: (horaF * 60) + minF
+        };
+    });
+
+    const horarios = [];
+
+    for (let tiempo = aperturaMinutos; (tiempo + tiempoTotalRequerido) <= cierreMinutos; tiempo += intervalo) {
+        const slotInicio = tiempo;
+        const slotFin = tiempo + tiempoTotalRequerido;
+
+        // Hay choque si el turno empieza antes de que termine la limpieza de otra cita,
+        // o si termina (con su propia limpieza) después de que empiece otra
+        const choca = citasEnMinutos.some(cita => {
+            return (slotInicio < cita.fin + 10) && (slotFin > cita.inicio);
+        });
+
+        if (!choca) {
+            const horas = Math.floor(slotInicio / 60).toString().padStart(2, '0');
+            const minutos = (slotInicio % 60).toString().padStart(2, '0');
+            
+            const ampm = Math.floor(slotInicio / 60) >= 12 ? 'PM' : 'AM';
+            const horas12 = Math.floor(slotInicio / 60) % 12 || 12;
+
+            horarios.push({
+                hora24: `${horas}:${minutos}`,
+                hora12: `${horas12}:${minutos} ${ampm}`
+            });
+        }
+    }
+
+    return { ok: true, horarios, mensaje: "Horarios disponibles calculados" };
+};
+
 const obtenerHorariosDisponibles = async (req, res) => {
     try {
         const { fecha, barbero_id, servicio_id } = req.body;
         const excluirCitaId = req.body.excluir_cita_id || null; // al reprogramar, la cita no se bloquea a sí misma
 
-        const servicioQuery = await pool.query(
-            'SELECT duracion_minutos FROM servicios WHERE id = $1',
-            [servicio_id]
-        );
-        
-        if (servicioQuery.rows.length === 0) {
-            return res.status(404).json({ error: 'Servicio no encontrado' });
-        }
-
-        const tiempoServicio = servicioQuery.rows[0].duracion_minutos;
-        const tiempoTotalRequerido = tiempoServicio + 10; 
-
-        const citasOcupadasQuery = await pool.query(
-            `SELECT hora_inicio, hora_fin FROM citas 
-             WHERE barbero_id = $1 AND fecha_cita = $2 AND estado NOT IN ('CANCELADA', 'NO_ASISTIO')
-               AND ($3::uuid IS NULL OR id <> $3::uuid)
-             ORDER BY hora_inicio ASC`,
-            [barbero_id, fecha, excluirCitaId]
-        );
-        const citasOcupadas = citasOcupadasQuery.rows;
-
-        const fechaObj = new Date(fecha + 'T12:00:00'); 
-        const diaSemana = fechaObj.getDay(); 
-
-        const horarioQuery = await pool.query(
-            'SELECT hora_inicio, hora_fin, es_descanso FROM horarios_barberos WHERE barbero_id = $1 AND dia_semana = $2',
-            [barbero_id, diaSemana]
-        );
-
-        if (horarioQuery.rows.length === 0 || horarioQuery.rows[0].es_descanso) {
-            return res.status(200).json({ 
-                mensaje: "El barbero no trabaja este día o está de descanso",
-                horariosDisponibles: [] 
-            });
-        }
-
-        const turnoBarbero = horarioQuery.rows[0];
-        const [horaEntrada, minEntrada] = turnoBarbero.hora_inicio.split(':').map(Number);
-        const [horaSalida, minSalida] = turnoBarbero.hora_fin.split(':').map(Number);
-
-        const aperturaMinutos = (horaEntrada * 60) + minEntrada;
-        const cierreMinutos = (horaSalida * 60) + minSalida;
-        const intervalo = 30; 
-
-        const citasEnMinutos = citasOcupadas.map(cita => {
-            const [horaI, minI] = cita.hora_inicio.split(':').map(Number);
-            const [horaF, minF] = cita.hora_fin.split(':').map(Number);
-            return {
-                inicio: (horaI * 60) + minI,
-                fin: (horaF * 60) + minF
-            };
-        });
-
-        const horarios = [];
-
-        for (let tiempo = aperturaMinutos; (tiempo + tiempoTotalRequerido) <= cierreMinutos; tiempo += intervalo) {
-            const slotInicio = tiempo;
-            const slotFin = tiempo + tiempoTotalRequerido;
-
-            // Hay choque si el turno empieza antes de que termine la limpieza de otra cita,
-            // o si termina (con su propia limpieza) después de que empiece otra
-            const choca = citasEnMinutos.some(cita => {
-                return (slotInicio < cita.fin + 10) && (slotFin > cita.inicio);
-            });
-
-            if (!choca) {
-                const horas = Math.floor(slotInicio / 60).toString().padStart(2, '0');
-                const minutos = (slotInicio % 60).toString().padStart(2, '0');
-                
-                const ampm = Math.floor(slotInicio / 60) >= 12 ? 'PM' : 'AM';
-                const horas12 = Math.floor(slotInicio / 60) % 12 || 12;
-
-                horarios.push({
-                    hora24: `${horas}:${minutos}`,
-                    hora12: `${horas12}:${minutos} ${ampm}`
-                });
-            }
+        const r = await calcularHorariosLibres(pool, { fecha, barbero_id, servicio_id, excluirCitaId });
+        if (!r.ok) {
+            return res.status(r.status).json({ error: r.error });
         }
 
         res.status(200).json({ 
-            mensaje: "Horarios disponibles calculados",
-            horariosDisponibles: horarios 
+            mensaje: r.mensaje,
+            horariosDisponibles: r.horarios 
         });
     } catch (error) {
         console.error("Error al buscar horarios:", error);
@@ -450,5 +461,9 @@ module.exports = {
     obtenerTodasLasCitasHoy,
     obtenerCitasPorFecha,
     cambiarEstado,
-    reprogramarCita
+    reprogramarCita,
+    // Compartidas con el portal del cliente
+    validarHorarioCita,
+    calcularHorariosLibres,
+    fechaYHoraLocal
 };

@@ -124,7 +124,8 @@
                     localStorage.setItem('usuario_id', data.id || '');
                     localStorage.setItem('rol', String(data.rol));
                     if (data.barbero_id) localStorage.setItem('barbero_id', data.barbero_id);
-                    window.location.href = 'dashboard.html';
+                    // Los clientes (rol 3) van a su portal, no al panel
+                    window.location.href = String(data.rol) === '3' ? 'mis-citas.html' : 'dashboard.html';
                     return;
                 }
                 mensajeError.textContent = data.message || 'Credenciales inválidas';

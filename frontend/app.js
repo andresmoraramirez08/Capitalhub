@@ -20,6 +20,11 @@ const CH_MENUS_ADMIN = ['menu-catalogo', 'menu-clientes', 'menu-barberos', 'menu
         window.location.replace('login.html');
         return;
     }
+    // Un cliente (rol 3) no tiene nada que hacer en el panel: va a su portal
+    if (localStorage.getItem('rol') === '3') {
+        window.location.replace('mis-citas.html');
+        return;
+    }
     if (localStorage.getItem('rol') !== '1' && CH_PAGINAS_ADMIN.includes(pagina)) {
         window.location.replace('dashboard.html');
     }

@@ -32,7 +32,10 @@ CREATE TABLE usuarios (
     password_hash VARCHAR(255) NOT NULL, -- Cifrado bcrypt con factor >= 10
     activo BOOLEAN DEFAULT TRUE,
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    -- Aviso de privacidad (LFPDPPP): fecha/hora y versión que aceptó el cliente al registrarse
+    aviso_privacidad_aceptado_en TIMESTAMP WITH TIME ZONE NULL,
+    aviso_privacidad_version VARCHAR(20) NULL
 );
 
 -- -----------------------------------------------------------------------------
@@ -43,12 +46,14 @@ CREATE TABLE barberos (
     nombre VARCHAR(100) NOT NULL,
     telefono VARCHAR(20),
     especialidad VARCHAR(100),
-    activo BOOLEAN DEFAULT TRUE
+    activo BOOLEAN DEFAULT TRUE,
+    -- Cuenta con la que el barbero entra al sistema (rol 2); NULL si no tiene acceso
+    usuario_id UUID NULL UNIQUE REFERENCES usuarios(id) ON DELETE SET NULL
 );
 
 CREATE TABLE horarios_barberos (
     id SERIAL PRIMARY KEY,
-    barbero_id UUID NOT NULL REFERENCES barberos(id) ON DELETE CASCADE,
+    barbero_id UUID NOT NULL REFERENCES barberos(id),
     dia_semana SMALLINT NOT NULL CHECK (dia_semana BETWEEN 0 AND 6), -- 0: Domingo, 1: Lunes, ..., 6: Sábado
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
@@ -102,6 +107,9 @@ CREATE TABLE citas (
     estado estado_cita DEFAULT 'CONFIRMADA',
     tolerancia_minutos INT DEFAULT 10,
     motivo_cancelacion VARCHAR(255) NULL,
+    -- Aviso de privacidad aceptado por el invitado al agendar desde la web
+    aviso_privacidad_aceptado_en TIMESTAMP WITH TIME ZONE NULL,
+    aviso_privacidad_version VARCHAR(20) NULL,
     
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
