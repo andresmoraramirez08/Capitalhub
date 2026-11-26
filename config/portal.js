@@ -11,7 +11,16 @@ const HORAS_MIN_RESERVA = 24;      // RF-AG-02: reservar con al menos 24 h de an
 const HORAS_MIN_CANCELACION = 5;   // RF-AG-03: cancelar o reprogramar con al menos 5 h
 
 // Tienda en línea
-const COSTO_ENVIO_DURANGO = 80;   // PRUEBA: confirmar con la barbería el costo real del envío
+// Envíos solo dentro del estado de Durango (códigos postales 34000 a 35999), en dos zonas:
+const COSTO_ENVIO_CIUDAD = 80;    // PRUEBA: ciudad de Durango (CP 34000-34399). Confirmar con la barbería.
+const COSTO_ENVIO_ESTADO = 150;   // PRUEBA: resto de los municipios del estado. Confirmar con la barbería.
+
+/** Costo de envío según el código postal; null si no es del estado de Durango */
+const costoEnvioPorCP = (cp) => {
+    if (!/^3[45]\d{3}$/.test(String(cp || ''))) return null;
+    const n = Number(cp);
+    return n >= 34000 && n <= 34399 ? COSTO_ENVIO_CIUDAD : COSTO_ENVIO_ESTADO;
+};
 const MINUTOS_PARA_PAGAR = 30;    // si el pago en línea no se completa, el pedido se cancela y el stock regresa
 const MAX_PIEZAS_POR_PRODUCTO = 10;
 
@@ -51,7 +60,9 @@ module.exports = {
     AVISO_PRIVACIDAD_VERSION,
     HORAS_MIN_RESERVA,
     HORAS_MIN_CANCELACION,
-    COSTO_ENVIO_DURANGO,
+    COSTO_ENVIO_CIUDAD,
+    COSTO_ENVIO_ESTADO,
+    costoEnvioPorCP,
     MINUTOS_PARA_PAGAR,
     MAX_PIEZAS_POR_PRODUCTO,
     REGEX_FECHA,

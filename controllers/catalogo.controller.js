@@ -332,6 +332,8 @@ const listarVentas = async (req, res) => {
                 v.colonia,
                 v.referencias_domicilio,
                 v.pasarela_referencia_id,
+                -- Pedido de la tienda en línea (no venta de mostrador)
+                (v.metodo_pago = 'PASARELA_ONLINE' OR v.aviso_privacidad_version IS NOT NULL OR MAX(u.rol_id) = 3) AS es_web,
                 COALESCE(
                     json_agg(
                         json_build_object(
@@ -346,6 +348,7 @@ const listarVentas = async (req, res) => {
              FROM ventas v
              LEFT JOIN detalle_ventas dv ON dv.venta_id = v.id
              LEFT JOIN productos p ON p.id = dv.producto_id
+             LEFT JOIN usuarios u ON u.id = v.usuario_id
              GROUP BY v.id
              ORDER BY v.creado_en DESC
              LIMIT 50`
@@ -372,7 +375,10 @@ const cambiarEstadoVenta = async (req, res) => {
         await client.query('BEGIN');
 
         const ventaRes = await client.query(
-            'SELECT id, estado FROM ventas WHERE id = $1 FOR UPDATE',
+            `SELECT v.id, v.estado,
+                    (v.metodo_pago = 'PASARELA_ONLINE' OR v.aviso_privacidad_version IS NOT NULL
+                     OR EXISTS (SELECT 1 FROM usuarios u WHERE u.id = v.usuario_id AND u.rol_id = 3)) AS es_web
+             FROM ventas v WHERE v.id = $1 FOR UPDATE OF v`,
             [id]
         );
 
@@ -383,6 +389,14 @@ const cambiarEstadoVenta = async (req, res) => {
         }
 
         const estadoAnterior = ventaRes.rows[0].estado;
+
+        // Un pedido de la tienda en línea ya pagado o entregado no se cancela desde el panel
+        // (las ventas de mostrador sí, para corregir errores de captura)
+        if (estado === 'CANCELADA' && ventaRes.rows[0].es_web && ['PAGADA', 'EN_CAMINO', 'ENTREGADA'].includes(estadoAnterior)) {
+            await client.query('ROLLBACK');
+            client.release();
+            return res.status(400).json({ message: 'Este pedido en línea ya está pagado o entregado y no se puede cancelar desde el panel.' });
+        }
 
         if (estado === 'CANCELADA' && estadoAnterior !== 'CANCELADA') {
             const detallesRes = await client.query(

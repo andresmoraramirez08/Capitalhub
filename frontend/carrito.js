@@ -3,7 +3,14 @@
 // =============================================================================
 const $ = (id) => document.getElementById(id);
 let PRODUCTOS = new Map();
-let CONFIG = { pago_en_linea: false, costo_envio: 0, minutos_para_pagar: 30 };
+let CONFIG = { pago_en_linea: false, costo_envio_ciudad: 0, costo_envio_estado: 0, minutos_para_pagar: 30 };
+
+/** Mismo cálculo que el servidor: ciudad de Durango (34000-34399) o resto del estado (hasta 35999) */
+function costoEnvioPorCP(cp) {
+    if (!/^3[45]\d{3}$/.test(String(cp || ''))) return null;
+    const n = Number(cp);
+    return n >= 34000 && n <= 34399 ? Number(CONFIG.costo_envio_ciudad) : Number(CONFIG.costo_envio_estado);
+}
 
 const entrega = () => document.querySelector('input[name="entrega"]:checked').value;
 const metodoPago = () => document.querySelector('input[name="pago"]:checked').value;
@@ -12,7 +19,7 @@ async function iniciar() {
     const [rp, rc] = await Promise.all([apiPortal('GET', '/api/portal/productos'), apiPortal('GET', '/api/tienda/config')]);
     if (rp.ok) PRODUCTOS = new Map(rp.data.map(p => [Number(p.id), p]));
     if (rc.ok) CONFIG = rc.data;
-    $('costo-envio-texto').textContent = `${dinero(CONFIG.costo_envio)} MXN`;
+    $('costo-envio-texto').textContent = `Ciudad de Durango ${dinero(CONFIG.costo_envio_ciudad)} · otros municipios ${dinero(CONFIG.costo_envio_estado)}`;
 
     // Quitamos del carrito lo que ya no existe o está agotado
     const antes = leerCarrito();
@@ -79,9 +86,11 @@ function pintar() {
 
     // Totales
     const subtotal = items.reduce((s, i) => s + PRODUCTOS.get(Number(i.producto_id)).precio * i.cantidad, 0);
-    const costoEnvio = entrega() === 'ENVIO_LOCAL_ESTATAL' ? Number(CONFIG.costo_envio) : 0;
+    const conEnvio = entrega() === 'ENVIO_LOCAL_ESTATAL';
+    const costoCP = conEnvio ? costoEnvioPorCP($('env-cp').value.trim()) : 0;
+    const costoEnvio = costoCP || 0;
     $('r-subtotal').textContent = dinero(subtotal);
-    $('r-envio').textContent = costoEnvio ? dinero(costoEnvio) : 'Gratis';
+    $('r-envio').textContent = !conEnvio ? 'Gratis' : (costoCP === null ? 'Escribe tu CP' : dinero(costoEnvio));
     $('r-total').textContent = `${dinero(subtotal + costoEnvio)} MXN`;
     const enLinea = metodoPago() === 'PASARELA_ONLINE';
     $('btn-confirmar').textContent = enLinea ? 'Pagar con Mercado Pago' : 'Confirmar pedido';
@@ -105,7 +114,7 @@ function validar() {
             referencias: $('env-referencias').value.trim()
         });
         if (!cuerpo.direccion_calle || !cuerpo.colonia || !cuerpo.municipio) return { error: 'Escribe la calle y número, la colonia y el municipio.', campo: 'env-calle' };
-        if (!/^34\d{3}$/.test(cuerpo.codigo_postal)) return { error: 'El código postal debe ser de Durango (34xxx).', campo: 'env-cp' };
+        if (costoEnvioPorCP(cuerpo.codigo_postal) === null) return { error: 'Solo enviamos dentro del estado de Durango (CP del 34000 al 35999).', campo: 'env-cp' };
     }
     if (!sesionCliente()) {
         Object.assign(cuerpo, {
@@ -160,6 +169,7 @@ document.addEventListener('click', (e) => {
     if (quitar) { cambiarCantidadCarrito(quitar.dataset.quitar, 0); pintar(); }
 });
 document.addEventListener('change', (e) => { if (e.target.name === 'entrega' || e.target.name === 'pago') pintar(); });
+$('env-cp').addEventListener('input', pintar);
 $('btn-confirmar').addEventListener('click', confirmar);
 
 iniciar();

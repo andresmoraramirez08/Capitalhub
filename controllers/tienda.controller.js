@@ -11,7 +11,7 @@ const { buscarOCrearCliente, ROL_CLIENTE } = require('./clientes.controller');
 const { enviarCorreo, correoPedido } = require('../config/correo');
 const mp = require('../config/mercadopago');
 const {
-    AVISO_PRIVACIDAD_VERSION, COSTO_ENVIO_DURANGO, MINUTOS_PARA_PAGAR, MAX_PIEZAS_POR_PRODUCTO,
+    AVISO_PRIVACIDAD_VERSION, COSTO_ENVIO_CIUDAD, COSTO_ENVIO_ESTADO, costoEnvioPorCP, MINUTOS_PARA_PAGAR, MAX_PIEZAS_POR_PRODUCTO,
     REGEX_UUID, limpiarTelefono, limpiarTexto, emailValido
 } = require('../config/portal');
 
@@ -25,7 +25,8 @@ const esCliente = (req) => req.user && Number(req.user.rol_id || req.user.rol) =
 const configTienda = (req, res) => {
     res.json({
         pago_en_linea: mp.pagoEnLineaActivo(),
-        costo_envio: COSTO_ENVIO_DURANGO,
+        costo_envio_ciudad: COSTO_ENVIO_CIUDAD,
+        costo_envio_estado: COSTO_ENVIO_ESTADO,
         minutos_para_pagar: MINUTOS_PARA_PAGAR,
         max_piezas: MAX_PIEZAS_POR_PRODUCTO
     });
@@ -187,8 +188,8 @@ const crearPedido = async (req, res) => {
         if (!direccion.municipio || !direccion.calle || !direccion.colonia) {
             return res.status(400).json({ message: 'Escribe la calle y número, la colonia y el municipio del envío.' });
         }
-        if (!/^34\d{3}$/.test(direccion.cp)) {
-            return res.status(400).json({ message: 'El código postal debe ser de Durango (empieza con 34 y tiene 5 dígitos).' });
+        if (costoEnvioPorCP(direccion.cp) === null) {
+            return res.status(400).json({ message: 'Solo enviamos dentro del estado de Durango (códigos postales del 34000 al 35999).' });
         }
     }
 
@@ -237,7 +238,7 @@ const crearPedido = async (req, res) => {
             items.push({ id: p.id, nombre: p.nombre, cantidad: cant, precio_unitario: Number(p.precio) });
         }
         const subtotal = redondear(items.reduce((s, i) => s + i.cantidad * i.precio_unitario, 0));
-        const costo_envio = tipo_entrega === 'ENVIO_LOCAL_ESTATAL' ? COSTO_ENVIO_DURANGO : 0;
+        const costo_envio = tipo_entrega === 'ENVIO_LOCAL_ESTATAL' ? costoEnvioPorCP(direccion.cp) : 0;
         const total = redondear(subtotal + costo_envio);
 
         // El invitado queda también en "Clientes" del panel

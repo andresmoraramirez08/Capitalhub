@@ -53,7 +53,7 @@ async function crearPreferencia(venta, minutosParaPagar) {
         currency_id: 'MXN'
     }));
     if (Number(venta.costo_envio) > 0) {
-        items.push({ id: 'envio', title: 'Envío dentro de Durango', quantity: 1, unit_price: Number(venta.costo_envio), currency_id: 'MXN' });
+        items.push({ id: 'envio', title: 'Envío dentro del estado de Durango', quantity: 1, unit_price: Number(venta.costo_envio), currency_id: 'MXN' });
     }
 
     const preferencia = {

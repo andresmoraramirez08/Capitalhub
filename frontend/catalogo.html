@@ -239,7 +239,7 @@
                             <div class="flex flex-col items-end gap-1">
                                 <span class="${cancelada ? 'text-zinc-500 line-through' : 'text-emerald-400'} font-bold">${dinero(v.total)}</span>
                                 ${botonSiguienteEstado(v)}
-                                ${!cancelada ? `<button onclick="cancelarVenta('${v.id}', this)" class="text-red-400 text-xs hover:text-red-300">Cancelar</button>` : ''}
+                                ${puedeCancelar(v) ? `<button onclick="cancelarVenta('${v.id}', this)" class="text-red-400 text-xs hover:text-red-300">Cancelar</button>` : ''}
                             </div>
                         </div>`;
                 }).join('') || '<p class="text-zinc-500 text-sm">Aún no hay ventas registradas.</p>';
@@ -389,6 +389,12 @@
             if (v.estado === 'PAGADA' && v.tipo_entrega === 'ENVIO_LOCAL_ESTATAL') return { estado: 'EN_CAMINO', texto: 'Marcar en camino' };
             if (v.estado === 'PAGADA' || v.estado === 'EN_CAMINO') return { estado: 'ENTREGADA', texto: 'Marcar entregado' };
             return null;
+        }
+
+        // Los pedidos en línea ya pagados o entregados no se cancelan; las ventas de mostrador sí (corrección de errores)
+        function puedeCancelar(v) {
+            if (v.estado === 'CANCELADA') return false;
+            return !(v.es_web && ['PAGADA', 'EN_CAMINO', 'ENTREGADA'].includes(v.estado));
         }
 
         function botonSiguienteEstado(v) {
