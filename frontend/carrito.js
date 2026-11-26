@@ -141,6 +141,7 @@ async function confirmar() {
         return mostrarToast(mensajeDe(r, 'No se pudo crear el pedido.'), 'error');
     }
     vaciarCarrito();
+    recordarUltimoPedido(r.data.venta_id, r.data.folio);
     if (r.data.url_pago) {
         mostrarToast('Te llevamos a Mercado Pago…');
         setTimeout(() => { location.href = r.data.url_pago; }, 600);

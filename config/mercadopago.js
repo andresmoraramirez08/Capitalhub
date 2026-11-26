@@ -1,7 +1,7 @@
 // =============================================================================
 // CapitalHub - Pagos en línea con Mercado Pago (Checkout Pro, API de preferencias)
 // Variables en .env:
-//   MP_ACCESS_TOKEN=TEST-...      (Access Token de PRUEBA de tu aplicación en Mercado Pago Developers)
+//   MP_ACCESS_TOKEN=APP_USR-...   (Access Token de PRUEBA: Tus integraciones > Pruebas > Credenciales de prueba)
 //   URL_PUBLICA=https://...       (solo en el hosting: dirección pública con HTTPS)
 // Mercado Pago solo acepta direcciones de regreso y de aviso (webhook) con HTTPS.
 // En localhost no hay HTTPS: el cliente regresa con el botón del sitio y el pago se

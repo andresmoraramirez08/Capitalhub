@@ -184,6 +184,31 @@ function pintarContadorCarrito() {
     document.querySelectorAll('[data-boton-carrito]').forEach(el => el.classList.toggle('hidden', n === 0));
 }
 
+// Último pedido hecho en este navegador: sirve para volver a él después de pagar en Mercado Pago
+const CLAVE_ULTIMO_PEDIDO = 'ch_ultimo_pedido';
+
+function recordarUltimoPedido(id, folio) {
+    try { localStorage.setItem(CLAVE_ULTIMO_PEDIDO, JSON.stringify({ id, folio, en: Date.now() })); } catch (e) { }
+}
+
+function olvidarUltimoPedido() {
+    try { localStorage.removeItem(CLAVE_ULTIMO_PEDIDO); } catch (e) { }
+}
+
+/** Aviso flotante "Ver mi pedido" (solo durante 2 días y fuera de la página del pedido) */
+function pintarAvisoUltimoPedido() {
+    if (/pedido\.html$/.test(location.pathname)) return;
+    let p = null;
+    try { p = JSON.parse(localStorage.getItem(CLAVE_ULTIMO_PEDIDO) || 'null'); } catch (e) { }
+    if (!p || !p.id || Date.now() - Number(p.en || 0) > 2 * 24 * 3600 * 1000) return;
+    const aviso = document.createElement('div');
+    aviso.className = 'fixed bottom-20 sm:bottom-5 left-4 z-40 flex items-center gap-3 bg-brand-card border border-brand-border rounded-xl shadow-2xl px-4 py-3 text-sm';
+    aviso.innerHTML = `<a href="pedido.html?id=${encodeURIComponent(p.id)}" class="font-semibold text-white underline">Ver mi pedido #${escaparHTML(p.folio || '')}</a>
+        <button type="button" class="text-neutral-500 hover:text-white text-lg leading-none" aria-label="Cerrar aviso">×</button>`;
+    aviso.querySelector('button').addEventListener('click', () => { olvidarUltimoPedido(); aviso.remove(); });
+    document.body.appendChild(aviso);
+}
+
 const ESTADOS_PEDIDO = {
     PENDIENTE: { texto: 'Pendiente', clase: 'bg-amber-500/10 text-amber-300 border-amber-500/30' },
     PAGADA: { texto: 'Pagado', clase: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' },
@@ -289,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pintarZonaSesion();
     activarMenuMovil();
     pintarContadorCarrito();
+    pintarAvisoUltimoPedido();
     const anio = document.getElementById('anio-actual');
     if (anio) anio.textContent = new Date().getFullYear();
 });
