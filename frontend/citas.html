@@ -252,7 +252,8 @@
                 const datos = await respuesta.json();
                 let slots = datos.horariosDisponibles || [];
 
-                if (fecha === hoyLocal) {
+                // Se calcula en el momento (no al cargar la página), por si la agenda quedó abierta después de medianoche
+                if (fecha === fechaHoyLocal()) {
                     const ahora = new Date();
                     const horaAhora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
                     slots = slots.filter(h => String(h.hora24) > horaAhora);
@@ -358,7 +359,7 @@
                         acciones = estilo.etiqueta;
                     } else {
                         // Solo se cobra el día de la cita (no por adelantado)
-                        const puedeCobrar = cita.fecha_cita <= hoyLocal;
+                        const puedeCobrar = cita.fecha_cita <= fechaHoyLocal();
                         acciones = `
                             ${puedeCobrar ? `<button onclick="cambiarEstadoAgenda('${cita.id}', 'COMPLETADA', this)" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/50 px-3 py-1 rounded text-xs hover:bg-emerald-600/40 transition">Cobrar</button>` : '<span class="text-xs text-zinc-400">Próxima</span>'}
                             <div class="flex gap-1">
@@ -480,6 +481,11 @@
                 toggleCargando(btn, false);
                 mostrarToast('Error de conexión', 'error');
             }
+        });
+
+        // Al abrir un calendario se actualiza la fecha mínima (por si ya cambió el día)
+        ['fecha_cita', 'reprog-fecha'].forEach(id => {
+            document.getElementById(id).addEventListener('focus', (e) => { e.target.min = fechaHoyLocal(); });
         });
 
         document.getElementById('consulta_fecha').addEventListener('change', cargarCitasAgenda);
