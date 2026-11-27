@@ -2,6 +2,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 const pool = require('../config/db');
+const { cloudinaryActivo, subirImagenProducto, borrarImagenProducto, TIPOS_PERMITIDOS } = require('../config/cloudinary');
 
 const listarCategorias = async (req, res) => {
     try {
@@ -50,6 +51,7 @@ const listarProductos = async (req, res) => {
                 p.stock_actual,
                 p.stock_minimo,
                 p.activo,
+                p.imagen_url,
                 p.creado_en
              FROM productos p
              LEFT JOIN categorias_productos c ON p.categoria_id = c.id
@@ -192,6 +194,47 @@ const actualizarProducto = async (req, res) => {
         }
         console.error('Error al actualizar producto:', error);
         res.status(500).json({ message: 'Error interno al actualizar producto' });
+    }
+};
+
+// -----------------------------------------------------------------------------
+// Foto del producto (Cloudinary). El panel manda la imagen ya reducida, como
+// archivo binario (Content-Type image/jpeg, image/png o image/webp).
+// -----------------------------------------------------------------------------
+const subirImagen = async (req, res) => {
+    try {
+        if (!cloudinaryActivo()) {
+            return res.status(503).json({ message: 'Las fotos no están configuradas: faltan las variables de Cloudinary en el servidor.' });
+        }
+        const id = Number(req.params.id);
+        const tipo = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+        if (!TIPOS_PERMITIDOS.includes(tipo) || !Buffer.isBuffer(req.body) || req.body.length === 0) {
+            return res.status(400).json({ message: 'Sube una imagen JPG, PNG o WEBP.' });
+        }
+        const existe = await pool.query('SELECT id FROM productos WHERE id = $1', [id]);
+        if (existe.rows.length === 0) return res.status(404).json({ message: 'Producto no encontrado' });
+
+        const url = await subirImagenProducto(id, req.body, tipo);
+        await pool.query('UPDATE productos SET imagen_url = $1 WHERE id = $2', [url, id]);
+        res.status(200).json({ message: 'Foto guardada', imagen_url: url });
+    } catch (error) {
+        console.error('Error al subir la foto del producto:', error.message);
+        res.status(502).json({ message: 'No se pudo guardar la foto. Intenta de nuevo.' });
+    }
+};
+
+const quitarImagen = async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        const r = await pool.query('UPDATE productos SET imagen_url = NULL WHERE id = $1 RETURNING id', [id]);
+        if (r.rows.length === 0) return res.status(404).json({ message: 'Producto no encontrado' });
+        if (cloudinaryActivo()) {
+            borrarImagenProducto(id).catch(e => console.error('Cloudinary - borrar foto:', e.message));
+        }
+        res.status(200).json({ message: 'Foto quitada' });
+    } catch (error) {
+        console.error('Error al quitar la foto del producto:', error);
+        res.status(500).json({ message: 'Error interno al quitar la foto' });
     }
 };
 
@@ -439,6 +482,8 @@ module.exports = {
     listarProductos,
     crearProducto,
     actualizarProducto,
+    subirImagen,
+    quitarImagen,
     registrarVentaRapida,
     listarVentas,
     cambiarEstadoVenta

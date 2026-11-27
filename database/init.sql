@@ -159,6 +159,7 @@ CREATE TABLE productos (
     stock_actual INT NOT NULL DEFAULT 0 CHECK (stock_actual >= 0),
     stock_minimo INT NOT NULL DEFAULT 3 CHECK (stock_minimo >= 0),
     activo BOOLEAN DEFAULT TRUE,
+    imagen_url VARCHAR(500) NULL, -- Foto del producto en Cloudinary
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

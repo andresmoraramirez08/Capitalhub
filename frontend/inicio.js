@@ -79,6 +79,10 @@ function pintarEquipo() {
         </div>`).join('') || '<p class="text-sm text-brand-muted col-span-full text-center">Por ahora no hay barberos con agenda en línea. Llámanos al 618-310-0009.</p>';
 }
 
+// Cloudinary entrega la foto al tamaño pedido y en el formato más ligero para el navegador
+const urlFoto = (url, ancho) => (url && url.includes('res.cloudinary.com'))
+    ? url.replace('/upload/', `/upload/f_auto,q_auto,c_limit,w_${ancho}/`) : url;
+
 const EMOJI_CATEGORIA = [[/cera|pomada/i, '💈'], [/peine|accesorio/i, '🪮'], [/shampoo/i, '🧴'], [/barba|minoxidil/i, '🧔'], [/tinte|pigment/i, '✨']];
 
 async function cargarProductos() {
@@ -90,7 +94,9 @@ async function cargarProductos() {
         return `
         <div class="bg-brand-card border border-brand-border rounded-xl p-3 sm:p-4 flex flex-col justify-between">
             <div>
-                <div class="h-24 sm:h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-3xl sm:text-4xl border border-brand-border">${emoji}</div>
+                ${p.imagen_url
+                    ? `<img src="${escaparHTML(urlFoto(p.imagen_url, 500))}" alt="${escaparHTML(p.nombre)}" loading="lazy" class="w-full h-24 sm:h-36 object-cover bg-black rounded-lg mb-3 border border-brand-border">`
+                    : `<div class="h-24 sm:h-36 bg-black rounded-lg mb-3 flex items-center justify-center text-3xl sm:text-4xl border border-brand-border">${emoji}</div>`}
                 <span class="text-[10px] uppercase font-bold text-brand-gold">${escaparHTML(p.categoria || 'General')}</span>
                 <h4 class="text-sm font-bold text-white mt-1">${escaparHTML(p.nombre)}</h4>
                 ${p.descripcion ? `<p class="text-xs text-brand-muted mt-1 hidden sm:block">${escaparHTML(p.descripcion)}</p>` : ''}

@@ -87,7 +87,7 @@ const obtenerBarberos = async (req, res) => {
 const obtenerProductos = async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT p.id, p.nombre, p.descripcion, p.precio, c.nombre AS categoria,
+            `SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen_url, c.nombre AS categoria,
                     (p.stock_actual > 0) AS disponible
              FROM productos p
              LEFT JOIN categorias_productos c ON c.id = p.categoria_id
