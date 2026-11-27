@@ -1,19 +1,18 @@
-const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
-require('dotenv').config();
+const pool = require('./config/db'); // usa la misma conexión que el servidor (local o DATABASE_URL)
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+// La contraseña ya no va escrita en el código: se pasa al correr el script.
+// Uso: node crearAdmin.js "ContraseñaSegura"
+const passwordNueva = process.argv[2] || '';
+if (passwordNueva.length < 8) {
+    console.error('🔴 Escribe una contraseña de al menos 8 caracteres. Uso: node crearAdmin.js "ContraseñaSegura"');
+    process.exit(1);
+}
 
 async function generarAdmin() {
     try {
-        // Encriptamos la contraseña 'admin123' con costo 10
-        const passwordHash = await bcrypt.hash('admin123', 10);
+        // Se guarda solo el hash de bcrypt (costo 10, RNF-SEG-02)
+        const passwordHash = await bcrypt.hash(passwordNueva, 10);
 
         await pool.query(`
             INSERT INTO usuarios (rol_id, nombre, apellidos, email, telefono, password_hash)

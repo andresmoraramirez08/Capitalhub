@@ -1,3 +1,6 @@
+// La hora del servidor es la de México (los hostings usan UTC). Debe ir antes de todo.
+process.env.TZ = process.env.TZ || 'America/Mexico_City';
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -10,9 +13,21 @@ const serviciosRoutes = require('./routes/servicios.routes');
 const citasRoutes = require('./routes/citas.routes');
 
 const app = express();
+const enProduccion = process.env.NODE_ENV === 'production';
+
+if (!process.env.JWT_SECRET) {
+    console.error('🔴 Falta la variable JWT_SECRET. Agrégala al .env (o al panel del hosting) y reinicia.');
+    process.exit(1);
+}
+
+// En el hosting hay un proxy delante (HTTPS): así req.ip es la IP real del cliente
+// y el límite de intentos funciona por persona y no por proxy.
+if (enProduccion) app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
 // 1. PRIMERO LOS MIDDLEWARES (Lectores de datos)
-app.use(cors());
+// El frontend se sirve desde este mismo servidor. En producción solo se acepta el propio dominio.
+app.use(cors(process.env.URL_PUBLICA ? { origin: process.env.URL_PUBLICA.replace(/\/+$/, '') } : {}));
 app.use(express.json()); // <-- ESTA LÍNEA ES LA QUE TRADUCE EL FORMULARIO
 app.use(express.static(path.join(__dirname, 'frontend')));
 
@@ -35,9 +50,17 @@ const pool = require('./config/db');
 
 // Probar la conexión a la base de datos
 pool.connect()
-  .then(client => {
+  .then(async client => {
     console.log('🟢 Conectado exitosamente a PostgreSQL (CapitalHub)');
-    client.release(); // devolvemos la conexión de prueba al pool
+    try {
+      // ¿La base trabaja con la hora de México? (necesario para las reglas de 24 h y 5 h)
+      const r = await client.query("SELECT (now() AT TIME ZONE 'America/Mexico_City') = LOCALTIMESTAMP AS ok, current_database() AS base");
+      if (!r.rows[0].ok) {
+        console.warn(`⚠️  La base no está en hora de México. Corre una vez: ALTER DATABASE ${r.rows[0].base} SET timezone = 'America/Mexico_City'; y reinicia.`);
+      }
+    } finally {
+      client.release(); // devolvemos la conexión de prueba al pool
+    }
   })
   .catch(err => console.error('🔴 Error al conectar con PostgreSQL (Esperando a que termine la instalación...)'));
 
